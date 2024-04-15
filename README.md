@@ -1,5 +1,22 @@
 # 🤖OPEN-LLM-HUB
-LLM管理平台，屏蔽多LLM厂商的api差异化，提供高性能的统一服务接口（OpenAI api）并定制接口业务逻辑
+<span style="font-size: 30px;"> <strong>description</strong></span>
+<p>
+LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
+</p> 
+项目关键词：
+<li>高性能服务器</li>
+<li>业务场景广覆盖</li>
+<li>开箱即用</li>
+
+
+<br>
+<br>
+
+
+<span style="font-size: 30px;"> <strong>项目版本</strong></span>
+<li>v1.0：<strong>基本功能实现 -> 模型服务管理、服务调用等</strong></li>
+<li>v2.0：<strong>接口保障性功能实现 -> 熔断降级、限流、负载均衡等</strong></li>
+<li>v3.0：<strong>服务高可用（模型调用接口）</strong></li>
 
 
 ## Note 📓
