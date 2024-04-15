@@ -45,7 +45,5 @@ public class MainApp implements ApplicationRunner{
                 +"\n");
 
         mainServer.start();
-
-        log.info("proxy server app started success, server properties info --> {}", nettyServerProperties.toString());
     }
 }
