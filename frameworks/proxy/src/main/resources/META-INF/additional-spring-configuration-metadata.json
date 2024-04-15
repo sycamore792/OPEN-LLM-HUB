@@ -1,0 +1,7 @@
+{"properties": [
+  {
+    "name": "netty-server.port",
+    "type": "java.lang.Integer",
+    "description": "netty服务监听端口（不可与springboot端口相同）."
+  }
+]}
