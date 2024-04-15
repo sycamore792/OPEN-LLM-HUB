@@ -1,5 +1,5 @@
 # 🤖OPEN-LLM-HUB
-<span style="font-size: 30px;"> <strong>description</strong></span>
+<span style="font-size: 30px;"> <strong>Description</strong></span>
 <p>
 LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
 </p> 
@@ -10,16 +10,16 @@ LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一�
 
 
 <br>
-<br>
 
 
 <span style="font-size: 30px;"> <strong>项目版本</strong></span>
 <li>v1.0：<strong>基本功能实现 -> 模型服务管理、服务调用等</strong></li>
 <li>v2.0：<strong>接口保障性功能实现 -> 熔断降级、限流、负载均衡等</strong></li>
 <li>v3.0：<strong>服务高可用（模型调用接口）</strong></li>
+<br>
 
+<span style="font-size: 30px;"> <strong>Note 📓</strong></span>
 
-## Note 📓
 ### 一些思考：
     1.  对于一个模型服务平台来讲，流量集中于模型调用，因此，需要结合考虑模型调用的并发能力，
     可拓展性，需要提供一个高性能的外部接口。这里我们考虑使用 netty 作为外部接口的实现框架，有如下几点考虑：
