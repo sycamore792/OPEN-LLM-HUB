@@ -18,7 +18,20 @@ LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一�
 <li>v3.0：<strong>服务高可用（模型调用接口）</strong></li>
 <br>
 
+<span style="font-size: 30px;"> <strong>🚀更新</strong></span>
+
+
+<li>24.4.16：模型服务统一网关：路由验证、token鉴权</li>
+
+
+
+
+<br>
 <span style="font-size: 30px;"> <strong>Note 📓</strong></span>
+
+
+
+
 
 ### 一些思考：
     1.  对于一个模型服务平台来讲，流量集中于模型调用，因此，需要结合考虑模型调用的并发能力，

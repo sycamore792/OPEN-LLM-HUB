@@ -17,7 +17,7 @@ import org.sycamore.llm.hub.frameworks.proxy.core.ServerHandler;
  */
 @Slf4j
 @Sharable
-@ServerHandler(order = 1)
+@ServerHandler(order = 2)
 public class NettyHttpServerHandler extends ChannelInboundHandlerAdapter {
 
     /**
@@ -30,8 +30,8 @@ public class NettyHttpServerHandler extends ChannelInboundHandlerAdapter {
     @Override
     public void channelRead(ChannelHandlerContext ctx, Object msg) throws Exception {
         // 将接收到的消息转换为 FullHttpRequest 对象
-        FullHttpRequest request = (FullHttpRequest) msg;
-        log.info("Received request: {}", request);
+//        FullHttpRequest request = (FullHttpRequest) msg;
+        log.info("Received request: {}", msg);
         // 创建HTTP响应
         ByteBuf content = Unpooled.copiedBuffer("Hello, World!", CharsetUtil.UTF_8);
         FullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.OK, content);
