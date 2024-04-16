@@ -1,7 +1,8 @@
 # 🤖OPEN-LLM-HUB
 <span style="font-size: 30px;"> <strong>Description</strong></span>
-<p>
-LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
+<p style="color: #adaba2;font-size: 20px;font-family: 'DejaVu Sans Mono'">
+<strong>LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
+</strong>
 </p> 
 项目关键词：
 <li>高性能服务器</li>
@@ -22,6 +23,17 @@ LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一�
 
 
 <li>24.4.16：模型服务统一网关：路由验证、token鉴权</li>
+
+
+
+
+<br>
+<span style="font-size: 30px;"> <strong style="color: blanchedalmond">TODO</strong></span>
+
+- [ ] 流式接口与非流式接口（能否整合？）
+- [ ] sse协议/websocket协议支持
+- [ ] 流式数据转发
+- [ ] ....
 
 
 
@@ -52,3 +64,5 @@ LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一�
     2. 整合多模型厂商通信协议：
         a. 理想情况：无代码侵入，通过配置实现协议适配
         b. 类似场景大家的做法都是使用适配器，通过硬编码集成到项目中
+
+    3. 核心还是服务端与客户端的桥接，通过共用一个事件循环
