@@ -1,4 +1,5 @@
 package org.sycamore.llm.hub.frameworks.proxy.core;
+
 import io.netty.channel.*;
 import io.netty.channel.epoll.EpollEventLoopGroup;
 import io.netty.channel.epoll.EpollServerSocketChannel;
@@ -36,6 +37,7 @@ public class MainServer implements ApplicationContextAware {
     private EventLoopGroup workerGroup;
     private ServerBootstrap serverBootstrap;
     private List<ChannelHandler> handlers;
+
     public void start() throws Exception {
         //初始化工作组
         this.init();
@@ -58,10 +60,10 @@ public class MainServer implements ApplicationContextAware {
 
                             );
                             //加载用户自定义处理器
-                            if (Objects.nonNull(handlers)&&!handlers.isEmpty()){
-                                handlers.forEach(handler ->{
+                            if (Objects.nonNull(handlers) && !handlers.isEmpty()) {
+                                handlers.forEach(handler -> {
                                     ch.pipeline().addLast(handler);
-                                    log.info("loaded user handler：{}",handler.getClass().getName());
+                                    log.info("loaded user handler：{}", handler.getClass().getName());
                                 });
                             }
                         }
@@ -82,9 +84,10 @@ public class MainServer implements ApplicationContextAware {
             log.info("server has bean shutdown, bye~");
         }
     }
+
     private void init() {
         // 创建服务端启动引导
-        this.serverBootstrap  = new ServerBootstrap();
+        this.serverBootstrap = new ServerBootstrap();
         if (useEpoll()) {
             // 判断是否使用Epoll模型，这是Linux系统下的高性能网络通信模型
             log.info("os support epoll, selected EpollEventLoop model");

@@ -43,7 +43,6 @@ public class MainApp implements ApplicationRunner{
                 " ░     ░ ░                 ░  ░ ░     ░ ░            ░  ░       ░       ░ ░     ░        ░  ░                                    \n" +
                 "      ░░ ░                    ░ ░     ░                                                                                          "
                 +"\n");
-
         mainServer.start();
     }
 }

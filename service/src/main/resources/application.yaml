@@ -1,2 +1,56 @@
 netty-server:
-  port: 8019
+  port: 8888
+  bossGroupCapacity: 1
+  workerGroupCapacity: 10
+
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 200MB
+      max-request-size: 200MB
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    type: com.alibaba.druid.pool.DruidDataSource
+    url: jdbc:mysql://1.94.23.76:3306/llm_hub?useSSL=false&serverTimezone=GMT%2B8&characterEncoding=utf8&useServerPrepStmts=false&rewriteBatchedStatements=true
+    username: root
+    password: EasyLink1!
+    druid:
+      aop-patterns: "work.linruchang.*,work.linruchang.config.*"
+      initial-size: 5
+      min-idle: 20
+      max-active: 200
+      max-wait: -1
+      filter:
+        stat:
+          enabled: true
+          db-type: mysql
+          log-slow-sql: true
+          slow-sql-millis: 3000
+        wall:
+          config:
+            multi-statement-allow: true
+        # 监控过滤器
+      web-stat-filter:
+        enabled: true
+        exclusions:
+          - "*.js"
+          - "*.gif"
+          - "*.jpg"
+          - "*.png"
+          - "*.css"
+          - "*.ico"
+          - "/druid/*"
+      stat-view-servlet:
+        #        是否开启监控
+        enabled: true
+        #        监控路径
+        url-pattern: /druid/*
+        #        是否可以重置数据
+        reset-enable: false
+        #        登录密码
+        login-password: sycamore
+        #        登录名
+        login-username: sycamore
+        validation-query: "SELECT 1 FROM DUAL "

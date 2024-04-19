@@ -1,7 +1,17 @@
-{"properties": [
-  {
-    "name": "netty-server.port",
-    "type": "java.lang.Integer",
-    "description": "netty服务监听端口（不可与springboot端口相同）."
-  }
-]}
+{
+  "properties": [
+    {
+      "name": "netty-server.port",
+      "type": "java.lang.Integer",
+      "description": "netty服务监听端口（不可与springboot端口相同）."
+    },{
+      "name": "netty-server.bossGroupCapacity",
+      "type": "java.lang.Integer",
+      "description": "netty Boos组容量."
+    },{
+      "name": "netty-server.workerGroupCapacity",
+      "type": "java.lang.Integer",
+      "description": "netty Worker组容量."
+    }
+  ]
+}

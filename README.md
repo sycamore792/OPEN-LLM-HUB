@@ -1,5 +1,5 @@
 # 🤖OPEN-LLM-HUB
-<span style="font-size: 30px;"> <strong>Description</strong></span>
+<span style="font-size: 30px;"> <strong>Description：</strong></span>
 <p style="color: #adaba2;font-size: 20px;font-family: 'DejaVu Sans Mono'">
 <strong>LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
 </strong>
@@ -31,7 +31,9 @@
 <span style="font-size: 30px;"> <strong style="color: blanchedalmond">TODO</strong></span>
 
 - [ ] 流式接口与非流式接口（能否整合？）
-- [ ] sse协议/websocket协议支持
+- [ ] sse协议
+- [ ] 提供默认的模型API协议支持
+- [ ] websocket协议支持   
 - [ ] 流式数据转发
 - [ ] ....
 

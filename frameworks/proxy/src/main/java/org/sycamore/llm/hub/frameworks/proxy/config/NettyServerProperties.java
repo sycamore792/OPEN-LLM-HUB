@@ -9,9 +9,12 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @version: 1.0
  * @description: netty server 配置
  */
-@ConfigurationProperties(prefix = "netty-server")
+@ConfigurationProperties(NettyServerProperties.PREFIX)
 @Data
 public class NettyServerProperties {
+    public static final String PREFIX = "netty-server";
+
+
     private Integer port = 8099;
     private Integer bossGroupCapacity = 1;
     private Integer workerGroupCapacity = 1;
@@ -19,6 +22,6 @@ public class NettyServerProperties {
     @Override
     public String toString() {
         return "ProxyServerProperties:\n" +
-                "port=" + port ;
+                "port=" + port;
     }
 }

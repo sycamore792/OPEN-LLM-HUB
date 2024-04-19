@@ -1,4 +1,4 @@
-package org.sycamore.llm.hub.service.netty.handler;
+package org.sycamore.llm.hub.service.netty.server.handler;
 
 import com.alibaba.fastjson2.JSON;
 import io.netty.buffer.Unpooled;
@@ -37,7 +37,6 @@ public class GatewayServiceHandler extends SimpleChannelInboundHandler<FullHttpR
                     .addListener(ChannelFutureListener.CLOSE);
             return;
         }
-
         if (!isValidHeader(request)){
             ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.UNAUTHORIZED, Unpooled.copiedBuffer("Invalid Request header", CharsetUtil.UTF_8)))
                     .addListener(ChannelFutureListener.CLOSE);
