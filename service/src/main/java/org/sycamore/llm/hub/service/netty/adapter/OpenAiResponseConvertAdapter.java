@@ -25,6 +25,6 @@ public class OpenAiResponseConvertAdapter implements IResponseConvertAdapter{
             return convertedResponseDTO;
         }
 
-        return null;
+        return convertedResponseDTO;
     }
 }

@@ -23,6 +23,7 @@ import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
 import org.sycamore.llm.hub.service.netty.client.handler.ClintInboundHandler;
 
 import java.net.URI;
+import java.net.URL;
 
 import static org.sycamore.llm.hub.frameworks.proxy.toolkits.UriUtil.getPortWithDefault;
 import static org.sycamore.llm.hub.frameworks.proxy.toolkits.UriUtil.requiresSSL;
@@ -39,6 +40,7 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
     private final ChannelHandlerContext ctxFromServerSide;
     private final IResponseConvertAdapter responseConvertAdapter;
     private final DefaultFullHttpRequest modelRequest;
+    private final String modelServiceUrl;
 
 
     @Override
@@ -49,7 +51,7 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
             //todo 代理转发请求
 
 
-            URI uri = URI.create(modelRequest.uri());
+            URI uri = URI.create(modelServiceUrl);
             // 创建SSL上下文
             SslContext sslCtx = requiresSSL(uri) ?
                     SslContextBuilder

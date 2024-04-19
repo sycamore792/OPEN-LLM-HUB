@@ -55,7 +55,6 @@ public class ClintInboundHandler extends SimpleChannelInboundHandler<HttpContent
         }
         remoteCtx.writeAndFlush(new DefaultHttpContent(Unpooled.copiedBuffer(msg, CharsetUtil.UTF_8)));
 
-
     }
 
 

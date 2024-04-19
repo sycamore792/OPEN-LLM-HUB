@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.sycamore.llm.hub.frameworks.proxy.core.ServerHandler;
 import org.sycamore.llm.hub.service.dto.domain.ChatReqWrapper;
 import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
+import org.sycamore.llm.hub.service.netty.adapter.OpenAiResponseConvertAdapter;
 import org.sycamore.llm.hub.service.netty.client.handler.ClintInboundHandler;
 import org.sycamore.llm.hub.service.netty.server.listener.ServerConnectSuccessListener;
 
@@ -46,7 +47,7 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
 
 
         // 根据 api-key 获取对应的模型以及响应适配器
-        IResponseConvertAdapter responseConvertAdapter = null;
+        IResponseConvertAdapter responseConvertAdapter = new OpenAiResponseConvertAdapter();
 
 
         // 封装请求对象
@@ -63,7 +64,7 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
 
 
         //写响应并绑定监听器
-        ctx.writeAndFlush(response)
+        ctx.writeAndFlush(response) .addListener(new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,"http://58.34.1.32:8881/v1/chat/completions"))
 //                .addListener(new GenericFutureListener<Future<? super Void>>() {
 //            @Override
 //            public void operationComplete(Future<? super Void> future) throws Exception {
@@ -130,7 +131,7 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
 //                }
 //            }
 //        })
-                .addListener(new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest))
+
 
         ;
 
