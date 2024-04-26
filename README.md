@@ -31,12 +31,12 @@
 <span style="font-size: 30px;"> <strong style="color: blanchedalmond">TODO</strong></span>
 
 - [ ] 流式接口与非流式接口（能否整合？）
-- [ ] 请求适配器
+- [x] 请求适配器
 - [x] 响应适配器
-- [ ] sse协议
+- [x] sse协议
 - [ ] 提供默认的模型API协议支持
 - [ ] websocket协议支持   
-- [ ] 流式数据转发
+- [x] 流式数据转发
 - [ ] ....
 
 
