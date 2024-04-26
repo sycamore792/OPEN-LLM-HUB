@@ -1,6 +1,7 @@
 package org.sycamore.llm.hub.service.dto.domain;
 
 import lombok.Data;
+import org.sycamore.llm.hub.frameworks.model.openai.OpenAiChatRequestModel;
 import org.sycamore.llm.hub.service.dto.req.ChatReqDTO;
 
 /**
@@ -11,6 +12,6 @@ import org.sycamore.llm.hub.service.dto.req.ChatReqDTO;
  */
 @Data
 public class ChatReqWrapper {
-    private ChatReqDTO chatReqDTO;
+    private OpenAiChatRequestModel chatReqDTO;
     private String key;
 }

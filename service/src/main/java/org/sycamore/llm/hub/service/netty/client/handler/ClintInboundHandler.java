@@ -61,10 +61,12 @@ public class ClintInboundHandler extends SimpleChannelInboundHandler<HttpContent
             log.info("接收到消息：{}", event);
             if (!(remoteCtx.channel().isActive() && remoteCtx.channel().isWritable() && remoteCtx.channel().isOpen() && remoteCtx.channel().isRegistered())) {
                 log.info("服务端侧写入异常，连接取消");
-                log.info("remoteCtx.channel().isActive(): [{}]", remoteCtx.channel().isActive());
-                log.info("remoteCtx.channel().isWritable(): [{}]", remoteCtx.channel().isWritable());
-                log.info("remoteCtx.channel().isOpen(): [{}]", remoteCtx.channel().isOpen());
-                log.info("remoteCtx.channel().isRegistered(): [{}]", remoteCtx.channel().isRegistered());
+                log.info("\nremoteCtx.channel().isActive(): [{}]\nremoteCtx.channel().isWritable(): [{}]\nremoteCtx.channel().isOpen(): [{}]\nremoteCtx.channel().isRegistered(): [{}]",
+                        remoteCtx.channel().isActive(),
+                        remoteCtx.channel().isWritable(),
+                        remoteCtx.channel().isOpen(),
+                        remoteCtx.channel().isRegistered()
+                        );
                 ctx.close();
                 remoteCtx.close();
                 return;
@@ -120,4 +122,6 @@ public class ClintInboundHandler extends SimpleChannelInboundHandler<HttpContent
         log.error("Unexpected exception from downstream", cause);
         ctx.close();
     }
+
+
 }
