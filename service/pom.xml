@@ -48,6 +48,11 @@
             <artifactId>llm-hub-proxy-spring-boot-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.sycamore.llm-hub</groupId>
+            <artifactId>llm-hub-model-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
 </project>

@@ -5,21 +5,21 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>org.sycamore.llm-hub</groupId>
-        <artifactId>llm-hub-all</artifactId>
+        <artifactId>llm-hub-frameworks</artifactId>
         <version>1.0-SNAPSHOT</version>
     </parent>
-    <artifactId>llm-hub-frameworks</artifactId>
-    <packaging>pom</packaging>
-    <modules>
-        <module>proxy</module>
-        <module>model</module>
-    </modules>
+
+    <artifactId>llm-hub-model-spring-boot-starter</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-
-
+    <dependencies>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+    </dependencies>
 </project>

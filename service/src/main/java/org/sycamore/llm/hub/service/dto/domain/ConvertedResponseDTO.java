@@ -1,6 +1,7 @@
 package org.sycamore.llm.hub.service.dto.domain;
 
 import lombok.Data;
+import org.sycamore.llm.hub.frameworks.model.openai.OpenAiChatResponseModel;
 
 /**
  * @author: Sycamore
@@ -11,4 +12,6 @@ import lombok.Data;
 @Data
 public class ConvertedResponseDTO {
     private boolean stopFlag;
+
+    private OpenAiChatResponseModel responseModel;
 }
