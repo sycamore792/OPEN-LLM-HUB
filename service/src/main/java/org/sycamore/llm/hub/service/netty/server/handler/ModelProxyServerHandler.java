@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.sycamore.llm.hub.frameworks.proxy.core.ServerHandler;
 import org.sycamore.llm.hub.service.dao.entity.ApiKeyModelDO;
 import org.sycamore.llm.hub.service.dto.domain.ChatReqWrapper;
+import org.sycamore.llm.hub.service.netty.adapter.IRequestConvertAdapter;
 import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
+import org.sycamore.llm.hub.service.netty.adapter.req.OpenAiRequestConvertAdapter;
 import org.sycamore.llm.hub.service.netty.adapter.resp.OpenAiResponseConvertAdapter;
 import org.sycamore.llm.hub.service.netty.server.listener.ServerConnectSuccessListener;
 import org.sycamore.llm.hub.service.service.IApiKeyModelService;
@@ -46,11 +48,13 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
                 .eq(ApiKeyModelDO::getApiKey, chatReqWrapper.getKey())
                 .eq(ApiKeyModelDO::getModelName, chatReqWrapper.getChatReqDTO().getModel())
         );
+        //todo 策略获取适配器对
+        IResponseConvertAdapter responseConvertAdapter = new OpenAiResponseConvertAdapter();
+        IRequestConvertAdapter requestConvertAdapter = new OpenAiRequestConvertAdapter();
 
 
 
         String modelServiceUrl = apiKeyModelDO.getServiceUrl();
-        IResponseConvertAdapter responseConvertAdapter = new OpenAiResponseConvertAdapter();
 
 
         // 封装请求对象
