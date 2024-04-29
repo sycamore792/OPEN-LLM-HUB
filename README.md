@@ -1,4 +1,5 @@
 # 🤖OPEN-LLM-HUB
+
 <span style="font-size: 30px;"> <strong>Description：</strong></span>
 <p style="color: #adaba2;font-size: 20px;font-family: 'DejaVu Sans Mono'">
 <strong>LLM管理平台，屏蔽多LLM厂商的API差异化，提供高性能的统一服务接口（OpenAI API）并定制接口业务逻辑
@@ -30,26 +31,22 @@
 <br>
 <span style="font-size: 30px;"> <strong style="color: blanchedalmond">TODO</strong></span>
 
-- [ ] 流式接口与非流式接口（能否整合？）
+- [x] 流式数据转发
 - [x] 请求适配器
 - [x] 响应适配器
 - [x] sse协议
 - [ ] 提供默认的模型API协议支持
-- [ ] websocket协议支持   
-- [x] 流式数据转发
+- [ ] 限流、频控
+- [ ] 调度策略(分布式优先级队列)
+- [ ] websocket协议支持
+- [ ] 流式接口与非流式接口（能否整合？）
 - [ ] ....
-
-
-
 
 <br>
 <span style="font-size: 30px;"> <strong>Note 📓</strong></span>
 
-
-
-
-
 ### 一些思考：
+
     1.  对于一个模型服务平台来讲，流量集中于模型调用，因此，需要结合考虑模型调用的并发能力，
     可拓展性，需要提供一个高性能的外部接口。这里我们考虑使用 netty 作为外部接口的实现框架，有如下几点考虑：
         a. netty 是一个高性能的异步网络框架，可以支持高并发的网络请求，考虑到模型调用场景以长连接为主，常规http框架网路模型弊端？
