@@ -18,6 +18,6 @@ public class RedisTest {
 
     @Test
     void test() {
-        redissonClient.getLock("test").tryLock()
+        redissonClient.getLock("test").tryLock();
     }
 }
