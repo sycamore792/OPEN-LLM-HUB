@@ -39,7 +39,6 @@ public class SimpleHttpClintInboundHandler extends SimpleChannelInboundHandler<H
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpContent content) throws Exception {
         ByteBuf byteBuf = content.content();
-        String string = byteBuf.toString(StandardCharsets.UTF_8);
         remoteCtx.writeAndFlush(new DefaultHttpContent(byteBuf));
         ctx.close();
 //        remoteCtx.close();
