@@ -12,6 +12,7 @@ import org.sycamore.llm.hub.service.dto.req.ChatReqDTO;
  */
 @Data
 public class ChatReqWrapper {
+
     private OpenAiChatRequestModel chatReqDTO;
     private String key;
 }

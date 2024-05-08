@@ -1,8 +1,8 @@
 package org.sycamore.llm.hub.service.netty.server.handler;
 
 
-import com.alibaba.fastjson2.JSONObject;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.alibaba.fastjson2.*;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.*;
@@ -12,16 +12,17 @@ import io.netty.util.CharsetUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sycamore.llm.hub.frameworks.proxy.core.ServerHandler;
-import org.sycamore.llm.hub.service.dao.entity.ApiKeyModelDO;
+import org.sycamore.llm.hub.service.dao.mapper.ModelMapper;
 import org.sycamore.llm.hub.service.dto.domain.ChatReqWrapper;
+import org.sycamore.llm.hub.service.dto.resp.SelectModelServerInfoByKeyRespDTO;
 import org.sycamore.llm.hub.service.netty.adapter.IRequestConvertAdapter;
 import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
 import org.sycamore.llm.hub.service.netty.adapter.req.OpenAiRequestConvertAdapter;
 import org.sycamore.llm.hub.service.netty.adapter.resp.OpenAiResponseConvertAdapter;
 import org.sycamore.llm.hub.service.netty.server.listener.ServerConnectSuccessListener;
-import org.sycamore.llm.hub.service.service.IApiKeyModelService;
-
 import java.net.URI;
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author 桑运昌
@@ -31,7 +32,7 @@ import java.net.URI;
 @ServerHandler(order = 1)
 @RequiredArgsConstructor
 public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReqWrapper> {
-    private final IApiKeyModelService apiKeyModelService;
+    private final ModelMapper modelMapper;
 
 
     @Override
@@ -44,38 +45,68 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
 
 
         // 根据 api-key 获取对应的模型以及请求适配器、响应适配器
-        ApiKeyModelDO apiKeyModelDO = apiKeyModelService.getOne(Wrappers.lambdaQuery(ApiKeyModelDO.class)
-                .eq(ApiKeyModelDO::getApiKey, chatReqWrapper.getKey())
-                .eq(ApiKeyModelDO::getModelName, chatReqWrapper.getChatReqDTO().getModel())
-        );
+        List<SelectModelServerInfoByKeyRespDTO> modelDtoList = modelMapper.selectModelServerInfoByKey(chatReqWrapper.getKey(), chatReqWrapper.getChatReqDTO().getModel());
+
+        if (Objects.isNull(modelDtoList) || modelDtoList.isEmpty()){
+            // 模型不存在
+            log.error("api-key:{} with model:[{}] not found in db", chatReqWrapper.getKey(), chatReqWrapper.getChatReqDTO().getModel());
+            ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Invalid Model Name For This Request With This Key", CharsetUtil.UTF_8)))
+                    .addListener(ChannelFutureListener.CLOSE);
+            return;
+        }
+        SelectModelServerInfoByKeyRespDTO selectModelServerInfoByKeyRespDTO = modelDtoList.get(0);
         //todo 策略获取适配器对
         IResponseConvertAdapter responseConvertAdapter = new OpenAiResponseConvertAdapter();
         IRequestConvertAdapter requestConvertAdapter = new OpenAiRequestConvertAdapter();
 
 
 
-        String modelServiceUrl = apiKeyModelDO.getServiceUrl();
+        String modelServiceUrl = selectModelServerInfoByKeyRespDTO.getModelServerBaseUrl()+"/v1/chat/completions";
 
 
         // 封装请求对象
         JSONObject jsonObject = JSONObject.from(chatReqWrapper.getChatReqDTO());
-        jsonObject.put("stream", true);
-        jsonObject.put("model", apiKeyModelDO.getModelName());
-        ByteBuf requestBody = Unpooled.copiedBuffer(jsonObject.toJSONString(), CharsetUtil.UTF_8);
+        jsonObject.put("model", selectModelServerInfoByKeyRespDTO.getModelServerName());
+        if (!chatReqWrapper.getChatReqDTO().getStream()){
+            jsonObject.put("stream", false);
+        }
+        jsonObject.remove("valid");
+        String bodyString = jsonObject.toJSONString();
+        ByteBuf requestBody = Unpooled.copiedBuffer(bodyString, CharsetUtil.UTF_8);
         URI uri = URI.create(modelServiceUrl);
         DefaultFullHttpRequest modelRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.POST, uri.getPath(), requestBody);
         modelRequest.headers().set(HttpHeaderNames.HOST, uri.getHost());
         modelRequest.headers().set(HttpHeaderNames.CONNECTION, HttpHeaderValues.KEEP_ALIVE);
         modelRequest.headers().set(HttpHeaderNames.CONTENT_TYPE, "application/json");
         modelRequest.headers().set(HttpHeaderNames.CONTENT_LENGTH, modelRequest.content().readableBytes());
-        modelRequest.headers().set("Authorization", "Bearer " + "122ae65f856b41c1aa2bfef31b0b6362");
-
+        if (StringUtils.isNotBlank(selectModelServerInfoByKeyRespDTO.getServerParams())){
+            JSONObject params = JSONObject.parseObject(selectModelServerInfoByKeyRespDTO.getServerParams());
+            //组装请求头
+            JSONArray headers = params.getJSONArray("headers");
+            if (Objects.nonNull(headers)){
+                for (int i = 0; i < headers.size(); i++) {
+                    JSONObject header = headers.getJSONObject(i);
+                    modelRequest.headers().set(header.getString("key"), header.getString("value"));
+                }
+            }
+        }
 
         //写响应并绑定监听器
-        ctx.writeAndFlush(response)
-           .addListener(
-                   new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl)
-           );
+        if (chatReqWrapper.getChatReqDTO().getStream()){
+            ctx.writeAndFlush(response)
+                    .addListener(
+                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl)
+                    );
+        }else {
+            ctx.writeAndFlush(response)
+                    .addListener(
+                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl)
+                    );
+        }
+
+
+
+
 
     }
 

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="org.sycamore.llm.hub.service.dao.mapper.ModelMapper">
+    <select id="selectModelServerInfoByKey" resultType="org.sycamore.llm.hub.service.dto.resp.SelectModelServerInfoByKeyRespDTO">
+        select llm_model_id , api_key ,model_server_name,model_server_base_url,server_params
+        from (select *
+              from api_key_model
+              where api_key = #{key}
+                and model_name = #{modelName}
+                and del_flag != 1) a
+                 left join model_llm b
+                           on a.llm_model_id = b.id
+    </select>
+
+</mapper>

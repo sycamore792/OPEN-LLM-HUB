@@ -1,9 +1,6 @@
 package org.sycamore.llm.hub.service.netty.server.listener;
 
-import com.alibaba.fastjson2.JSONObject;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -14,16 +11,15 @@ import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
-import io.netty.util.CharsetUtil;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
-import org.sycamore.llm.hub.service.netty.client.handler.ClintInboundHandler;
+import org.sycamore.llm.hub.service.netty.client.handler.SimpleHttpClintInboundHandler;
+import org.sycamore.llm.hub.service.netty.client.handler.SseClintInboundHandler;
 
 import java.net.URI;
-import java.net.URL;
 
 import static org.sycamore.llm.hub.frameworks.proxy.toolkits.UriUtil.getPortWithDefault;
 import static org.sycamore.llm.hub.frameworks.proxy.toolkits.UriUtil.requiresSSL;
@@ -71,7 +67,7 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
                             socketChannel.pipeline().addLast(
                                     new HttpClientCodec(),
                                     new ReadTimeoutHandler(8),
-                                    new ClintInboundHandler(ctxFromServerSide, responseConvertAdapter)
+                                    new SimpleHttpClintInboundHandler(ctxFromServerSide, responseConvertAdapter)
                             );
                         }
                     })

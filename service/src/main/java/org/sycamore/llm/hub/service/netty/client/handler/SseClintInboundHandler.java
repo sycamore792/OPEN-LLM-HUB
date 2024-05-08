@@ -26,14 +26,14 @@ import static org.sycamore.llm.hub.service.toolkits.ResponseConvertUtil.convertS
  * @description: TODO
  */
 @Slf4j
-public class ClintInboundHandler extends SimpleChannelInboundHandler<HttpContent> {
+public class SseClintInboundHandler extends SimpleChannelInboundHandler<HttpContent> {
 
     private final ChannelHandlerContext remoteCtx;
     private final IResponseConvertAdapter responseConvertAdapter;
     private final ByteBuf msgBuffer = Unpooled.buffer();
     private boolean lastEventEndedWithrn = false; // 用于记录上一个事件的结束符类型
 
-    public ClintInboundHandler(ChannelHandlerContext remoteCtx, IResponseConvertAdapter responseConvertAdapter) {
+    public SseClintInboundHandler(ChannelHandlerContext remoteCtx, IResponseConvertAdapter responseConvertAdapter) {
         this.remoteCtx = remoteCtx;
         this.responseConvertAdapter = responseConvertAdapter;
     }

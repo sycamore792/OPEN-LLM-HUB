@@ -23,6 +23,7 @@
         <mybatis-plus.version>3.4.3</mybatis-plus.version>
         <hutool-all.version>5.7.17</hutool-all.version>
         <common-lang3.version>3.12.0</common-lang3.version>
+        <redission.version>3.29.0</redission.version>
     </properties>
 
     <dependencyManagement>
