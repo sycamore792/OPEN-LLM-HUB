@@ -62,7 +62,6 @@ public class GatewayServiceHandler extends SimpleChannelInboundHandler<FullHttpR
         }
         log.info("request body: {}", requestBodyString);
         OpenAiChatRequestModel requestModel = JSON.parseObject(requestBodyString, OpenAiChatRequestModel.class, JSONReader.Feature.SupportSmartMatch);
-
         if (!requestModel.isValid()){
             log.error("request forbidden, request body is not valid");
             ctx.writeAndFlush(new DefaultFullHttpResponse(HttpVersion.HTTP_1_1, HttpResponseStatus.BAD_REQUEST, Unpooled.copiedBuffer("Invalid Request body", CharsetUtil.UTF_8)))
@@ -108,9 +107,7 @@ public class GatewayServiceHandler extends SimpleChannelInboundHandler<FullHttpR
                 log.error("Authorization header is not in db, request info :[{}]",request);
                 return false;
             }
-
-
-            //业务逻辑处理
+            // 业务逻辑处理
             return true;
         } else {
             log.error("Request dose not have Authorization header, request info :[{}]",request);

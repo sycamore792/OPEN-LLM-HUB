@@ -95,12 +95,12 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
         if (chatReqWrapper.getChatReqDTO().getStream()){
             ctx.writeAndFlush(response)
                     .addListener(
-                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl)
+                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl,true)
                     );
         }else {
             ctx.writeAndFlush(response)
                     .addListener(
-                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl)
+                            new ServerConnectSuccessListener(ctx,responseConvertAdapter,modelRequest,modelServiceUrl,false)
                     );
         }
 

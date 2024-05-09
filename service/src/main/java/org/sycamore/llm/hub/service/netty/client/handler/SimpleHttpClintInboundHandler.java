@@ -4,9 +4,12 @@ import com.alibaba.fastjson2.JSONObject;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufUtil;
 import io.netty.buffer.Unpooled;
+import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.handler.codec.http.DefaultFullHttpResponse;
 import io.netty.handler.codec.http.DefaultHttpContent;
+import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.HttpContent;
 import io.netty.util.CharsetUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +19,8 @@ import org.sycamore.llm.hub.service.netty.adapter.IResponseConvertAdapter;
 
 import java.nio.charset.StandardCharsets;
 
+import static io.netty.handler.codec.http.HttpResponseStatus.OK;
+import static io.netty.handler.codec.http.HttpVersion.HTTP_1_1;
 import static org.sycamore.llm.hub.service.toolkits.ResponseConvertUtil.convertEventSource2String;
 import static org.sycamore.llm.hub.service.toolkits.ResponseConvertUtil.convertString2EventSourceChunk;
 
@@ -38,12 +43,14 @@ public class SimpleHttpClintInboundHandler extends SimpleChannelInboundHandler<H
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpContent content) throws Exception {
-        ByteBuf byteBuf = content.content();
-        remoteCtx.writeAndFlush(new DefaultHttpContent(byteBuf));
-        ctx.close();
-//        remoteCtx.close();
-    }
 
+        ByteBuf byteBuf = content.content();
+        String responseBody = byteBuf.toString(StandardCharsets.UTF_8);
+        remoteCtx.writeAndFlush(new DefaultHttpContent(Unpooled.copiedBuffer(responseBody, CharsetUtil.UTF_8))).addListener(ChannelFutureListener.CLOSE);
+        log.info("非流式响应推送: {}", responseBody);
+        ctx.close();
+        remoteCtx.close();
+    }
 
 
     @Override

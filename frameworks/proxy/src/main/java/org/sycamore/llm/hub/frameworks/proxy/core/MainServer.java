@@ -17,7 +17,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.sycamore.llm.hub.frameworks.proxy.config.NettyServerProperties;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class MainServer implements ApplicationContextAware {
                     .channel(useEpoll() ? EpollServerSocketChannel.class : NioServerSocketChannel.class) // 设置服务器通道类型
                     .option(ChannelOption.SO_BACKLOG, 1024)            // TCP连接的最大队列长度
                     .option(ChannelOption.SO_REUSEADDR, true)          // 允许端口重用
-                    .option(ChannelOption.SO_KEEPALIVE, true)          // 保持连接检测
+//                    .option(ChannelOption.SO_KEEPALIVE, true)          // 保持连接检测
                     .childOption(ChannelOption.TCP_NODELAY, true)      // 禁用Nagle算法，适用于小数据即时传输
                     .childOption(ChannelOption.SO_SNDBUF, 65535)       // 设置发送缓冲区大小
                     .childOption(ChannelOption.SO_RCVBUF, 65535)       // 设置接收缓冲区大小
@@ -69,7 +68,7 @@ public class MainServer implements ApplicationContextAware {
                         }
                     });
             Channel ch = serverBootstrap.bind(nettyServerProperties.getPort()).sync().channel(); // 绑定端口并同步等待成功
-            log.info("proxy server app started success, server properties info --> {}", nettyServerProperties.toString());
+            log.info("proxy server app started success, server properties info --> {}", nettyServerProperties);
             ch.closeFuture().sync(); // 等待服务端链路关闭
         } finally {
             if (bossGroup != null) {

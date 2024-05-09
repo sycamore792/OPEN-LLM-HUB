@@ -37,7 +37,7 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
     private final IResponseConvertAdapter responseConvertAdapter;
     private final DefaultFullHttpRequest modelRequest;
     private final String modelServiceUrl;
-
+    private final boolean isStream;
 
     @Override
     public void operationComplete(Future<? super Void> future) throws Exception {
@@ -66,9 +66,13 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
                             }
                             socketChannel.pipeline().addLast(
                                     new HttpClientCodec(),
-                                    new ReadTimeoutHandler(8),
-                                    new SimpleHttpClintInboundHandler(ctxFromServerSide, responseConvertAdapter)
+                                    new ReadTimeoutHandler(8)
                             );
+                            if (isStream) {
+                                socketChannel.pipeline().addLast(new SseClintInboundHandler(ctxFromServerSide, responseConvertAdapter)); //流式处理
+                            }else {
+                                socketChannel.pipeline().addLast(new SimpleHttpClintInboundHandler(ctxFromServerSide, responseConvertAdapter)); //非流式
+                            }
                         }
                     })
                     .connect(uri.getHost(), getPortWithDefault(uri)).addListener(new ChannelFutureListener() {
