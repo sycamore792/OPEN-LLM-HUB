@@ -1,6 +1,7 @@
 package org.sycamore.llm.hub.service.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -11,8 +12,11 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class ModelController {
-    @GetMapping("test")
-    public String test() {
-        return "test";
+
+
+    @PostMapping("model/model-page")
+    public String modelPage() {
+        return "model-page";
     }
+
 }

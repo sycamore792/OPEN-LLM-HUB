@@ -68,7 +68,8 @@ public class MainServer implements ApplicationContextAware {
                         }
                     });
             Channel ch = serverBootstrap.bind(nettyServerProperties.getPort()).sync().channel(); // 绑定端口并同步等待成功
-            log.info("proxy server app started success, server properties info --> {}", nettyServerProperties);
+            log.info("proxy server app started success, server running at port --> {}", nettyServerProperties.getPort());
+//            log.info("proxy server app started success, server properties info --> {}", nettyServerProperties);
             ch.closeFuture().sync(); // 等待服务端链路关闭
         } finally {
             if (bossGroup != null) {

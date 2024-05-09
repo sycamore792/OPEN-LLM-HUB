@@ -114,12 +114,12 @@ public class SseClintInboundHandler extends SimpleChannelInboundHandler<HttpCont
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         remoteCtx.close();
-        log.info("channelInactive");
+        log.info("流式连接--与模型端点服务连接断开");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("Unexpected exception from downstream", cause);
+        log.error("流式连接--模型服务端点连接异常", cause);
         ctx.close();
     }
 

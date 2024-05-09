@@ -43,7 +43,6 @@ public class SimpleHttpClintInboundHandler extends SimpleChannelInboundHandler<H
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, HttpContent content) throws Exception {
-
         ByteBuf byteBuf = content.content();
         String responseBody = byteBuf.toString(StandardCharsets.UTF_8);
         remoteCtx.writeAndFlush(new DefaultHttpContent(Unpooled.copiedBuffer(responseBody, CharsetUtil.UTF_8))).addListener(ChannelFutureListener.CLOSE);
@@ -56,12 +55,12 @@ public class SimpleHttpClintInboundHandler extends SimpleChannelInboundHandler<H
     @Override
     public void channelInactive(ChannelHandlerContext ctx) {
         remoteCtx.close();
-        log.info("channelInactive");
+        log.info("非流式连接--与模型端点服务连接断开");
     }
 
     @Override
     public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-        log.error("Unexpected exception from downstream  {}", cause.getMessage());
+        log.error("非流式连接--模型服务端点连接异常", cause);
         ctx.close();
     }
 
