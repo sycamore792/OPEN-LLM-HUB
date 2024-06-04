@@ -1,5 +1,6 @@
 package org.sycamore.llm.hub.frameworks.model.openai;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 
 /**
@@ -10,8 +11,10 @@ import lombok.Data;
  */
 @Data
 public class OpenAiChatChoiceModel {
+    @JSONField(name = "finish_reason")
     private String finishReason;
     private Integer index;
+
     private OpenAiMessageModel message;
     private OpenAiMessageModel delta;
 }

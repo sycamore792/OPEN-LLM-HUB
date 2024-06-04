@@ -45,8 +45,6 @@ public class ServerConnectSuccessListener implements GenericFutureListener<Futur
             log.info("服务端侧连接已响应,客户端侧准备建立到模型服务的连接");
             // 建立到模型服务的连接
             //todo 代理转发请求
-
-
             URI uri = URI.create(modelServiceUrl);
             // 创建SSL上下文
             SslContext sslCtx = requiresSSL(uri) ?

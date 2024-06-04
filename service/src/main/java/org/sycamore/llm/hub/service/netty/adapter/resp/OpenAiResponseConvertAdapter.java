@@ -34,7 +34,6 @@ public class OpenAiResponseConvertAdapter implements IResponseConvertAdapter {
 
         //序列化配置，定义将实体中的驼峰命名转化为下划线
         OpenAiChatResponseModel responseModel = JSONObject.parseObject(response, OpenAiChatResponseModel.class, JSONReader.Feature.SupportSmartMatch);
-
         convertedResponseDTO.setResponseModel(responseModel);
 
         return convertedResponseDTO;

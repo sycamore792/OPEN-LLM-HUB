@@ -15,11 +15,6 @@ public class ResponseConvertUtil {
         return eventSourceChunk;
     }
 
-    public static void main(String[] args) {
-        String s = "data: {\"id\": \"chatcmpl-Gbd5Uqoo87Sj7XkSTZca5T\", \"model\": \"Qwen1.5-14B-Chat\", \"choices\": [{\"index\": 0, \"delta\": {\"role\": \"assistant\"}, \"finish_reason\": null}]}";
-        String trim = s.substring(EVENT_SOURCE_PREFIX.length()).trim();
-
-    }
 
     public static String convertString2EventSourceChunk(String eventSourceChunk){
         return EVENT_SOURCE_PREFIX + eventSourceChunk + "\n\n";

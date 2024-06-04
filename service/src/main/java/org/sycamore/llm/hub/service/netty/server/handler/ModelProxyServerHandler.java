@@ -108,7 +108,6 @@ public class ModelProxyServerHandler extends SimpleChannelInboundHandler<ChatReq
                             }
                         }
                     }
-
                     //写响应并绑定监听器
                     if (chatReqWrapper.getChatReqDTO().getStream()) {
                         ctx.writeAndFlush(response)

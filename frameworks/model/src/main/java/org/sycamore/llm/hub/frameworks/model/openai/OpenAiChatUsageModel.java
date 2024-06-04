@@ -1,5 +1,6 @@
 package org.sycamore.llm.hub.frameworks.model.openai;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 
 /**
@@ -10,9 +11,11 @@ import lombok.Data;
  */
 @Data
 public class OpenAiChatUsageModel {
-
+    @JSONField(name = "prompt_tokens")
     private Integer promptTokens;
+    @JSONField(name = "total_tokens")
     private Integer totalTokens;
+    @JSONField(name = "completion_tokens")
     private Integer completionTokens;
 
 }

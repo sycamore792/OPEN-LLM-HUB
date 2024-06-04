@@ -2,8 +2,6 @@ package org.sycamore.llm.hub.frameworks.model.openai;
 
 import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
-import org.springframework.util.StringUtils;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
@@ -41,6 +39,9 @@ public class OpenAiChatRequestModel {
      * <p>如果设置为 True，将会以 SSE（server-sent events）的形式以流式发送消息增量。消息流以 data: [DONE] 结尾。</p>
      */
     private Boolean stream;
+
+    private String user;
+
     public Boolean isValid(){
         if (Objects.isNull(messages) || messages.isEmpty()){
             return false;

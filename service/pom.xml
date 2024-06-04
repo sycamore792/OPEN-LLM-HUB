@@ -18,6 +18,10 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.github.xiaoymin</groupId>
+            <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
         </dependency>
@@ -50,6 +54,11 @@
         <dependency>
             <groupId>org.sycamore.llm-hub</groupId>
             <artifactId>llm-hub-proxy-spring-boot-starter</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.sycamore.llm-hub</groupId>
+            <artifactId>llm-hub-common-spring-boot-starter</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

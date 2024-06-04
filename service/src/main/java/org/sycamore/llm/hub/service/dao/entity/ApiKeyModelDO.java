@@ -2,6 +2,7 @@ package org.sycamore.llm.hub.service.dao.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
+import org.sycamore.llm.hub.service.dao.BaseDO;
 
 /**
  * @author: Sycamore
@@ -11,7 +12,7 @@ import lombok.Data;
  */
 @Data
 @TableName("api_key_model")
-public class ApiKeyModelDO {
+public class ApiKeyModelDO extends BaseDO {
     private Long id;
     private String apiKey ;
     private String modelName;

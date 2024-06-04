@@ -25,10 +25,22 @@
         <hutool-all.version>5.7.17</hutool-all.version>
         <common-lang3.version>3.12.0</common-lang3.version>
         <redission.version>3.29.0</redission.version>
+        <knife4j.version> 4.3.0</knife4j.version>
+        <dozer.version> 6.5.2</dozer.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>com.github.dozermapper</groupId>
+                <artifactId>dozer-spring-boot-starter</artifactId>
+                <version>${dozer.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.xiaoymin</groupId>
+                <artifactId>knife4j-openapi3-spring-boot-starter</artifactId>
+                <version>${knife4j.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
