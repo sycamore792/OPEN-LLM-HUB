@@ -7,7 +7,7 @@ import java.util.Collection;
 
 /**
  * 缓存接口
- *
+ * @author 桑运昌
  *
  */
 public interface Cache {

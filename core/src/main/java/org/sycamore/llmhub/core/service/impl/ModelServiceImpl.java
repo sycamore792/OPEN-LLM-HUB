@@ -5,10 +5,13 @@ import com.alibaba.fastjson2.JSONArray;
 import com.alibaba.fastjson2.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.sycamore.llmhub.core.ModelRequestCommand;
 import org.sycamore.llmhub.core.client.ReactorNettyClient;
+import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
+import org.sycamore.llmhub.core.model.openai.OpenAiStreamOptionModel;
 import org.sycamore.llmhub.core.service.ModelServiceI;
 import org.sycamore.llmhub.infrastructure.dataobject.mapper.ModelMapper;
 import org.sycamore.llmhub.infrastructure.dto.resp.SelectModelServerInfoByKeyRespDTO;
@@ -35,10 +38,8 @@ public class ModelServiceImpl implements ModelServiceI {
 
     @Override
     public void chatCompletions(ModelRequestCommand command, SseEmitter sseEmitter) {
-        String apiKey = command.getApiKey();
-        String model = command.getRequestModel().getModel();
         // 通过 apiKey 与 model 加载配置
-        SelectModelServerInfoByKeyRespDTO modelServerInfoRespDTO = modelMapper.selectModelServerInfoByKey(apiKey, model).get(0);
+        SelectModelServerInfoByKeyRespDTO modelServerInfoRespDTO = command.getModelServerInfo();
 
         // load 请求配置 （缓存）
         String url = modelServerInfoRespDTO.getModelServerBaseUrl() +"/chat/completions";
@@ -50,7 +51,6 @@ public class ModelServiceImpl implements ModelServiceI {
             headerMap.put(headerJson.getString("key"), headerJson.getString("value"));
         });
         headerMap.put("Content-Type", "application/json");
-        String modelServerName = modelServerInfoRespDTO.getModelServerName();
 
 /**
  * ,
@@ -81,23 +81,28 @@ public class ModelServiceImpl implements ModelServiceI {
  *                             }
  *                             ]
  */
+
         // 请求体适配
-        String body = String.format("""
-                        {
-                            "model": "%s",
-                            "messages": [
-                                {
-                                "role": "user",
-                                "content": "你谁啊"
-                                }
-                            ],
-                            "stream" : true,
-                            "stream_options":{
-                            "include_usage":true
-                             }
-                        }""",
-                modelServerName
-        );
+        OpenAiChatRequestModel requestModel = command.getRequestModel();
+        requestModel.setModel( modelServerInfoRespDTO.getModelServerName());
+        requestModel.setStreamOption(new OpenAiStreamOptionModel());
+        String body =  JSONObject.toJSONString(requestModel);
+//                String.format("""
+//                        {
+//                            "model": "%s",
+//                            "messages": [
+//                                {
+//                                "role": "user",
+//                                "content": "你谁啊"
+//                                }
+//                            ],
+//                            "stream" : true,
+//                            "stream_options":{
+//                            "include_usage":true
+//                             }
+//                        }""",
+//                modelServerName
+//        );
         // 加载响应体适配策略
 
         // 调用模型服务
@@ -106,12 +111,14 @@ public class ModelServiceImpl implements ModelServiceI {
                 body,
                 headerMap,
                 event -> {
-                    try {
-                        sseEmitter.send(event);
-                    } catch (IOException e) {
-                        // 客户端连接异常，关闭连接
-                        log.error("Client connection error", e);
-                        sseEmitter.completeWithError(e);
+                    if (!StringUtils.isBlank(event)){
+                        try {
+                            sseEmitter.send(event);
+                        } catch (IOException e) {
+                            // 客户端连接异常，关闭连接
+                            log.error("Client connection error", e);
+                            sseEmitter.completeWithError(e);
+                        }
                     }
                 },
                 sseEmitter::complete);

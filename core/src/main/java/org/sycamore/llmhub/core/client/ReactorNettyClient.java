@@ -6,6 +6,7 @@ import io.netty.handler.timeout.ReadTimeoutHandler;
 import io.netty.handler.timeout.WriteTimeoutHandler;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.Disposable;
@@ -76,21 +77,20 @@ public class ReactorNettyClient implements BaseClientI {
                 .send((req, outbound) -> outbound.sendString(Flux.just(body)))
                 .responseContent()
                 .asString()
-                .flatMap(content -> Flux.fromArray(content.split("\n\n")))
+                .flatMap(content -> Flux.fromArray(content.split("data:")))
                 .doOnComplete(() -> {
                     log.debug("SSE stream completed");
-//                    System.out.println(Thread.currentThread().getName() + " -- " + "SSE stream completed");
                     onComplete.run();
                 })
                 .subscribe(
                         event -> {
-                            log.debug("Received event: {}", event);
-//                            System.out.println(Thread.currentThread().getName() + " -- " + event);
-                            eventHandler.accept(event);
+                            if (!StringUtils.isBlank(event)){
+                                log.debug("Received event: {}", event);
+                                eventHandler.accept(event);
+                            }
                         },
                         error -> {
                             log.error("Error: ", error);
-//                            System.out.println(Thread.currentThread().getName() + " -- " + "Error: " + error.getMessage());
                         }
                 );
     }
