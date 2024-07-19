@@ -1,12 +1,10 @@
 package org.sycamore.llmhub.core.handler.api;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.sycamore.llmhub.core.ModelRequestCommand;
 import org.sycamore.llmhub.infrastructure.cache.CacheUtil;
 import org.sycamore.llmhub.infrastructure.cache.DistributedCache;
-import org.sycamore.llmhub.infrastructure.cache.StringRedisTemplateProxy;
 import org.sycamore.llmhub.infrastructure.dataobject.mapper.ModelMapper;
 import org.sycamore.llmhub.infrastructure.dto.resp.SelectModelServerInfoByKeyRespDTO;
 import org.sycamore.llmhub.infrastructure.exception.ClientException;
@@ -30,7 +28,7 @@ public class OuterApiRequestParamVerifyChainHandler implements OuterApiRequestCh
     private final ModelMapper modelMapper;
     @Override
     public void handler(ModelRequestCommand requestParam) {
-        if (!requestParam.getRequestModel().isValid()) {
+        if (!requestParam.getRequestModel().checkValid()) {
             throw new ClientException(REQUEST_BODY_VERIFY_ERROR);
         }
         String apiKey = requestParam.getApiKey();

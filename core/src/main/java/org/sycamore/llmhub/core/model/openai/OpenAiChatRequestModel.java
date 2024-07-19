@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.sycamore.llmhub.core.model.openai.OpenAiMessageModel.*;
 
 /**
@@ -42,8 +43,10 @@ public class OpenAiChatRequestModel {
     private Boolean stream;
 
     private String user;
+    @JSONField(name = "stream_options")
+    private OpenAiStreamOptionModel streamOption;
 
-    public Boolean isValid(){
+    public Boolean checkValid(){
         if (Objects.isNull(messages) || messages.isEmpty()){
             return false;
         }
@@ -77,15 +80,15 @@ public class OpenAiChatRequestModel {
         return  true;
     }
 
-    public static boolean isBlank(CharSequence cs) {
-        if (cs != null) {
-            int length = cs.length();
-            for (int i = 0; i < length; i++) {
-                if (!Character.isWhitespace(cs.charAt(i))) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+//    public static boolean isBlank(CharSequence cs) {
+//        if (cs != null) {
+//            int length = cs.length();
+//            for (int i = 0; i < length; i++) {
+//                if (!Character.isWhitespace(cs.charAt(i))) {
+//                    return false;
+//                }
+//            }
+//        }
+//        return true;
+//    }
 }

@@ -2,10 +2,14 @@
 package org.sycamore.llmhub.infrastructure.cache;
 
 
-import com.google.common.base.Joiner;
-import com.google.common.base.Strings;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
+import org.assertj.core.util.Strings;
+//import com.google.common.base.Joiner;
+//import com.google.common.base.Strings;
 
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.stream.Stream;
 
 /**
@@ -15,7 +19,7 @@ import java.util.stream.Stream;
  */
 public final class CacheUtil {
 
-    private static final String SPLICING_OPERATOR = "_";
+    private static final String SPLICING_OPERATOR = ":";
 
     /**
      * 构建缓存标识
@@ -24,10 +28,18 @@ public final class CacheUtil {
      * @return
      */
     public static String buildKey(String... keys) {
-        Stream.of(keys).forEach(each -> Optional.ofNullable(Strings.emptyToNull(each)).orElseThrow(() -> new RuntimeException("构建缓存 key 不允许为空")));
-        return Joiner.on(SPLICING_OPERATOR).join(keys);
+        Arrays.stream(keys).forEach(each -> Optional.ofNullable(empty2Null(each)).orElseThrow(() -> new RuntimeException("构建缓存 key 不允许为空")));
+//        Stream.of(keys).forEach(each -> Optional.ofNullable(Strings.emptyToNull(each)).orElseThrow(() -> new RuntimeException("构建缓存 key 不允许为空")));
+        StringJoiner keyJoiner = new StringJoiner(SPLICING_OPERATOR);
+        Arrays.stream(keys).forEach(keyJoiner::add);
+        return keyJoiner.toString();
     }
-
+    private static Object empty2Null(String obj) {
+       if (StringUtils.isEmpty(obj)){
+           return null;
+       }
+       return obj;
+    }
     /**
      * 判断结果是否为空或空的字符串
      *

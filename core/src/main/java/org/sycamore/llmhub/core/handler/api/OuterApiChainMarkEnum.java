@@ -7,5 +7,7 @@ import lombok.AllArgsConstructor;
  */
 @AllArgsConstructor
 public enum OuterApiChainMarkEnum {
+
     OUTER_API_REQUEST_FILTER;
+
 }
