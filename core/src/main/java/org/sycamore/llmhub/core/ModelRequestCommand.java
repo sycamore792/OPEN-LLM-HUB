@@ -3,6 +3,7 @@ package org.sycamore.llmhub.core;
 import lombok.Builder;
 import lombok.Data;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
+import org.sycamore.llmhub.infrastructure.dto.resp.SelectModelServerInfoByKeyRespDTO;
 
 /**
  * @author: Sycamore
@@ -16,4 +17,5 @@ import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
 public class ModelRequestCommand {
     private OpenAiChatRequestModel requestModel;
     private String apiKey;
+    private SelectModelServerInfoByKeyRespDTO modelServerInfo;
 }
