@@ -10,6 +10,9 @@
     <packaging>pom</packaging>
     <modules>
         <module>admin</module>
+        <module>start</module>
+        <module>infrastructure</module>
+        <module>core</module>
     </modules>
 
     <properties>
@@ -27,6 +30,7 @@
         <mapstruct.version>1.5.5.Final</mapstruct.version>
         <mapstruct.binding>0.2.0</mapstruct.binding>
         <projectlombok.version>1.18.32</projectlombok.version>
+        <reactor.version>2023.0.0</reactor.version>
     </properties>
     <dependencies>
         <dependency>
@@ -39,9 +43,24 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
+                <groupId>org.sycamore</groupId>
+                <artifactId>llm-hub-core</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.sycamore</groupId>
+                <artifactId>llm-hub-infrastructure</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.sycamore</groupId>
+                <artifactId>llm-hub-admin</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>io.projectreactor</groupId>
                 <artifactId>reactor-bom</artifactId>
-                <version>2022.0.21</version>
+                <version>${reactor.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>

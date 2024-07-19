@@ -9,7 +9,7 @@
         <version>1.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>llm-hub-admin</artifactId>
+    <artifactId>llm-hub-start</artifactId>
 
     <properties>
         <maven.compiler.source>21</maven.compiler.source>
@@ -19,8 +19,27 @@
     <dependencies>
         <dependency>
             <groupId>org.sycamore</groupId>
-            <artifactId>llm-hub-infrastructure</artifactId>
+            <artifactId>llm-hub-admin</artifactId>
         </dependency>
-
+        <dependency>
+            <groupId>org.sycamore</groupId>
+            <artifactId>llm-hub-core</artifactId>
+        </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
