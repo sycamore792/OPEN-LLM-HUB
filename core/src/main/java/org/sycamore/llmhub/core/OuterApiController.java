@@ -1,10 +1,13 @@
 package org.sycamore.llmhub.core;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.sycamore.llmhub.core.client.ReactorNettyClient;
+import org.sycamore.llmhub.core.handler.api.OuterApiChainMarkEnum;
+import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
+import org.sycamore.llmhub.core.service.ModelServiceI;
+import org.sycamore.llmhub.infrastructure.chain.AbstractChainContext;
 import reactor.core.Disposable;
 
 import java.io.IOException;
@@ -20,59 +23,17 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class OuterApiController {
 
-    private final ReactorNettyClient reactorNettyClient;
+    private final ModelServiceI modelService;
+    private final AbstractChainContext<ModelRequestCommand> abstractChainContext;
 
-    @GetMapping("/api/v1/chat")
-    public SseEmitter chat() {
+    @PostMapping("/v1/chat/completions")
+    public SseEmitter chatCompletions(@RequestHeader("Authorization") String authorization, @RequestBody OpenAiChatRequestModel requestModel) {
+        ModelRequestCommand command = ModelRequestCommand.builder().requestModel(requestModel).apiKey(authorization).build();
+        abstractChainContext.handler(OuterApiChainMarkEnum.OUTER_API_REQUEST_FILTER.name(), command);
+
         SseEmitter sseEmitter = new SseEmitter(-1L);
-        Disposable disposable = reactorNettyClient.sendRequest(
-                "https://ark.cn-beijing.volces.com/api/v3/chat/completions",
-                """
-                                {
-                            "model": "",
-                            "messages": [
-                                {
-                                "role": "user",
-                                "content": "你好"
-                                }
-                            ],
-                                "stream" : true,
-                                "stream_options":{
-                                "include_usage":true
-                                },
-                                "tools": [
-                                {
-                                "type": "function",
-                                "function": {
-                                    "name": "get_current_weather",
-                                    "description": "Get the current weather in a given location",
-                                    "parameters": {
-                                        "type": "object",
-                                        "properties": {
-                                            "location": {
-                                            "type": "string",
-                                            "description": "The city and state, e.g. San Francisco, CA"
-                                            },
-                                            "unit": {
-                                                "type": "string",
-                                                "enum": ["celsius", "fahrenheit"]
-                                            }
-                                        },
-                                        "required": ["location"]
-                                    }
-                                }
-                            }
-                            ]
-                        }""",
-                Map.of("Authorization", "Bearer "),
-                event -> {
-                    try {
-                        sseEmitter.send(event);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                },
-                sseEmitter::complete);
+        modelService.chatCompletions(command,sseEmitter);
+
         return sseEmitter;
     }
 

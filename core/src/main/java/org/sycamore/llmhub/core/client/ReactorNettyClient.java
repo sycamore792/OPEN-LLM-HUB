@@ -70,8 +70,6 @@ public class ReactorNettyClient implements BaseClientI {
     public Disposable sendRequest(String url, String body, Map<String, String> headerMap, Consumer<String> eventHandler, Runnable onComplete) {
         return clientInstance.headers(headers -> {
                     headerMap.forEach(headers::add);
-//                    headers.add("Authorization", "Bearer " + "API_KEY");
-//                    headers.add("Content-Type", "application/json");
                 })
                 .post()
                 .uri(url)
