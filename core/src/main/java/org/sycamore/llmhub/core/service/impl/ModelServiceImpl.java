@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tomcat.util.security.MD5Encoder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
@@ -61,26 +62,30 @@ public class ModelServiceImpl implements ModelServiceI {
         });
         headerMap.put("Content-Type", "application/json");
 
-
         // 加载协议code
         Integer protocolCode = modelServerInfoRespDTO.getProtocolCode();
 
 
         // 请求体适配
         OpenAiChatRequestModel requestModel = command.getRequestModel();
-        requestModel.setModel(modelServerInfoRespDTO.getModelServerName());
-        if (requestModel.isStream()){
-            requestModel.setStreamOption(new OpenAiStreamOptionModel());
-        }
-
 
         // todo 根据协议code加载convert策略 目前默认为openai（模型确实也都是接的openai协议的）所以直接字符串化
-        String body = JSONObject.toJSONString(requestModel);
+        OpenAiChatRequestModel requestModelCopy = new OpenAiChatRequestModel();
+        BeanUtils.copyProperties(requestModel, requestModelCopy);
+
+        requestModelCopy.setModel(modelServerInfoRespDTO.getModelServerName());
+        if (requestModel.isStream()){
+            requestModelCopy.setStreamOption(new OpenAiStreamOptionModel());
+        }
+        String body = JSONObject.toJSONString(requestModelCopy);
 
         //响应体公共参数值
+        String model = requestModel.getModel();
         long created = System.currentTimeMillis();
         String id = "chatcmpl-"+ UUID.nameUUIDFromBytes((command.getApiKey()+created+UUID.randomUUID()).getBytes());
-        String model = requestModel.getModel();
+        log.info("chatCompletions, Authorization：[ {} ]  requestModel: {}", command.getApiKey(), requestModel);
+
+
 
         ModelLog modelLog = new ModelLog();
         modelLog.setId(id);
@@ -88,7 +93,7 @@ public class ModelServiceImpl implements ModelServiceI {
         modelLog.setModelId(modelServerInfoRespDTO.getLlmModelId());
         JSONObject requestJson = new JSONObject();
         requestJson.put("origin",requestModel);
-        requestJson.put("convert",requestModel);
+        requestJson.put("convert",requestModelCopy);
         modelLog.setRequestJson(requestJson.toJSONString());
         modelLog.setCreated(created);
 
@@ -100,8 +105,6 @@ public class ModelServiceImpl implements ModelServiceI {
             responseJson.put("streamChunksConvert",streamChunksConvert);
         }
 
-
-
         // 调用模型服务
         Disposable disposable = reactorNettyClient.sendRequest(
                 requestModel.isStream(),
@@ -111,7 +114,7 @@ public class ModelServiceImpl implements ModelServiceI {
                 event -> {
                     if (!StringUtils.isBlank(event)) {
                         try {
-                            log.info("event:{}", event);
+                            log.debug("event:{}", event);
                             if (!requestModel.isStream()){
                                 responseJson.put("noStreamOrigin",event);
                             }else {
@@ -133,13 +136,13 @@ public class ModelServiceImpl implements ModelServiceI {
                                 if (requestModel.isStream()){
                                     streamChunksConvert.add(response);
                                     sseEmitter.send(JSONObject.toJSONString(response));
-                                    log.info("response:{}", response);
+                                    log.debug("response:{}", response);
                                     // 检查 response 和 choices 是否为空，choices 的长度是否大于 0
                                     if (response.isDoneFlag()) {
                                         sseEmitter.send("[DONE]");
                                         sseEmitter.complete();
                                     }
-                                }else {
+                                } else {
                                     responseJson.put("noStreamConvert",response);
                                     sseEmitter.sendBody(JSONObject.toJSONString(response), MediaType.APPLICATION_JSON);
                                     sseEmitter.complete();
@@ -167,7 +170,7 @@ public class ModelServiceImpl implements ModelServiceI {
 
         // 添加完成处理器
         sseEmitter.onCompletion(() -> {
-            log.info("SSE emitter completed");
+            log.debug("SSE emitter completed");
             disposable.dispose();
         });
 

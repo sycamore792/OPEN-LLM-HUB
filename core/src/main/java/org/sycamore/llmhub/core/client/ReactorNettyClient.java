@@ -96,7 +96,6 @@ public class ReactorNettyClient implements BaseClientI {
                         },
                         error -> {
                             log.error("Error: ", error);
-
                         }
                 );
     }
