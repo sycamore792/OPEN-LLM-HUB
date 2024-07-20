@@ -68,7 +68,7 @@ public class ReactorNettyClient implements BaseClientI {
     }
 
 
-    public Disposable sendRequest(String url, String body, Map<String, String> headerMap, Consumer<String> eventHandler, Runnable onComplete) {
+    public Disposable sendRequest(boolean sseFlag,String url, String body, Map<String, String> headerMap, Consumer<String> eventHandler, Runnable onComplete) {
         return clientInstance.headers(headers -> {
                     headerMap.forEach(headers::add);
                 })
@@ -77,7 +77,12 @@ public class ReactorNettyClient implements BaseClientI {
                 .send((req, outbound) -> outbound.sendString(Flux.just(body)))
                 .responseContent()
                 .asString()
-                .flatMap(content -> Flux.fromArray(content.split("data:")))
+                .flatMap(content -> {
+                    if (!sseFlag){
+                        return Flux.just(content);
+                    }
+                    return Flux.fromArray(content.split("data:"));
+                })
                 .doOnComplete(() -> {
                     log.debug("SSE stream completed");
                     onComplete.run();
@@ -91,6 +96,7 @@ public class ReactorNettyClient implements BaseClientI {
                         },
                         error -> {
                             log.error("Error: ", error);
+
                         }
                 );
     }

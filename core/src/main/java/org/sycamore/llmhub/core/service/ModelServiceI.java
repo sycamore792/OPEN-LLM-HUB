@@ -1,7 +1,7 @@
 package org.sycamore.llmhub.core.service;
 
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 import org.sycamore.llmhub.core.ModelRequestCommand;
+import org.sycamore.llmhub.infrastructure.common.SseEmitter;
 
 /**
  * @author: Sycamore

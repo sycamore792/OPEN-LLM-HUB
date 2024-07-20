@@ -40,11 +40,22 @@ public class OpenAiChatRequestModel {
     /**
      * <p>如果设置为 True，将会以 SSE（server-sent events）的形式以流式发送消息增量。消息流以 data: [DONE] 结尾。</p>
      */
-    private Boolean stream;
+    private boolean stream;
 
     private String user;
     @JSONField(name = "stream_options")
     private OpenAiStreamOptionModel streamOption;
+
+
+    /**
+     * <p>
+     *     A list of tools the model may call.
+     *     Currently, only functions are supported as a tool.
+     *     Use this to provide a list of functions the model may generate JSON inputs for.
+     *     <a href="https://platform.openai.com/docs/api-reference/chat/create">🔗</a>
+     * </p>
+     */
+    private List<OpenAiChatRequestToolModel> tools;
 
     public Boolean checkValid(){
         if (Objects.isNull(messages) || messages.isEmpty()){
@@ -73,22 +84,9 @@ public class OpenAiChatRequestModel {
             }
             current = current * -1;
         }
-        if (Objects.isNull(stream)){
-            this.stream = false;
-        }
+
 
         return  true;
     }
 
-//    public static boolean isBlank(CharSequence cs) {
-//        if (cs != null) {
-//            int length = cs.length();
-//            for (int i = 0; i < length; i++) {
-//                if (!Character.isWhitespace(cs.charAt(i))) {
-//                    return false;
-//                }
-//            }
-//        }
-//        return true;
-//    }
 }

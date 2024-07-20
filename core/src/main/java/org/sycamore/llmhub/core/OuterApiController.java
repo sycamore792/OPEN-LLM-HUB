@@ -4,16 +4,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
-import org.sycamore.llmhub.core.client.ReactorNettyClient;
 import org.sycamore.llmhub.core.handler.api.OuterApiChainMarkEnum;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
 import org.sycamore.llmhub.core.service.ModelServiceI;
 import org.sycamore.llmhub.infrastructure.chain.AbstractChainContext;
-import reactor.core.Disposable;
+import org.sycamore.llmhub.infrastructure.common.SseEmitter;
 
-import java.io.IOException;
-import java.util.Map;
 
 /**
  * @author: Sycamore
@@ -23,7 +19,7 @@ import java.util.Map;
  */
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "OuterApiController")
+@Tag(name = "外部开放接口")
 public class OuterApiController {
 
     private final ModelServiceI modelService;
