@@ -113,17 +113,6 @@ public class ModelServiceImpl implements ModelServiceI {
                                     sseEmitter.sendBody(JSONObject.toJSONString(response), MediaType.APPLICATION_JSON);
                                     sseEmitter.complete();
                                 }
-
-
-
-//
-//                                if (response.getChoices() != null && !response.getChoices().isEmpty()) {
-//                                    String finishReason = response.getChoices().get(0).getFinishReason();
-//                                    if ("stop".equals(finishReason) && !requestModel.isStream()) {
-//                                        sseEmitter.complete();
-//                                    }
-//                                }
-
                             }
 
                         } catch (Exception e) {
@@ -135,11 +124,6 @@ public class ModelServiceImpl implements ModelServiceI {
 
                 },
                 () -> {
-//                    if (isReady2Complete.get()){
-//                        sseEmitter.complete();
-//                    }else {
-//                        isReady2Complete.compareAndExchange(false, true);
-//                    }
                     // todo 发布完成事件
                 }
         );
