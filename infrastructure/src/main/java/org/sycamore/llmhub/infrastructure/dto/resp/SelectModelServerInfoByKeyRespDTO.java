@@ -15,4 +15,5 @@ public class SelectModelServerInfoByKeyRespDTO {
     private String modelServerName;
     private String modelServerBaseUrl;
     private String serverParams;
+    private Integer protocolCode;
 }

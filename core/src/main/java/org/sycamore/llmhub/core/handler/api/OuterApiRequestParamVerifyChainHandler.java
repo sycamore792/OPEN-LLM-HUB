@@ -31,6 +31,7 @@ public class OuterApiRequestParamVerifyChainHandler implements OuterApiRequestCh
         if (!requestParam.getRequestModel().checkValid()) {
             throw new ClientException(REQUEST_BODY_VERIFY_ERROR);
         }
+
         String apiKey = requestParam.getApiKey();
         String model = requestParam.getRequestModel().getModel();
 

@@ -16,14 +16,19 @@ import java.util.List;
  */
 public interface ModelMapper extends BaseMapper<ModelDO> {
     @Select("""
-             select llm_model_id , api_key ,model_server_name,model_server_base_url,server_params
+             select llm_model_id , api_key ,model_server_name,model_server_base_url,server_params,protocol_code
                     from (select *
                           from api_key_model
                           where api_key = #{key}
                             and model_name = #{modelName}
-                            and del_flag != 1) a
+                            and del_flag != 1 
+                            
+              ) a
                              left join model_llm b
-                                       on a.llm_model_id = b.id
+                 
+                              on a.llm_model_id = b.id
+                             AND b.model_type = 1
+                             AND b.del_flag != 1
             """)
     List<SelectModelServerInfoByKeyRespDTO> selectModelServerInfoByKey(@Param("key") String key, @Param("modelName") String modelName);
 }

@@ -4,6 +4,7 @@ import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * @author: Sycamore
@@ -20,7 +21,7 @@ public class OpenAiChatResponseModel {
     /**
      * 固定为 chat.completion。
      */
-    private String object;
+    private String object = "chat.completion";
     /**
      * 本次对话生成时间戳（秒）。
      */
@@ -33,4 +34,26 @@ public class OpenAiChatResponseModel {
     private String systemFingerPrint;
     private List<OpenAiChatChoiceModel> choices;
     private OpenAiChatUsageModel usage;
+
+
+    @JSONField(serialize = false)
+    private boolean doneFlag;
+
+    public static OpenAiChatResponseModel stopChoice(String id,Long created,String model,OpenAiChatUsageModel usage) {
+        OpenAiChatResponseModel response = new OpenAiChatResponseModel();
+        OpenAiChatChoiceModel openAiChatChoiceModel = new OpenAiChatChoiceModel();
+        openAiChatChoiceModel.setMessage(new OpenAiMessageModel());
+        openAiChatChoiceModel.setIndex(0);
+        openAiChatChoiceModel.setFinishReason("stop");
+
+
+
+        response.setChoices(List.of( openAiChatChoiceModel));
+        response.setId(id);
+        response.setCreated(created);
+        response.setModel(model);
+        response.setDoneFlag(true);
+        Optional.ofNullable(usage).ifPresent(response::setUsage);
+        return response;
+    }
 }

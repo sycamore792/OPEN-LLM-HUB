@@ -10,10 +10,15 @@ import lombok.Data;
  * @description: TODO
  */
 @Data
+//@Builder
 public class OpenAiChatChoiceModel {
+//
+
+    private String logprobs;
+
+    private Integer index;
     @JSONField(name = "finish_reason")
     private String finishReason;
-    private Integer index;
     private OpenAiMessageModel message;
     private OpenAiMessageModel delta;
 }
