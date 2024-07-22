@@ -1,4 +1,4 @@
-package org.sycamore.llmhub.core.convertor.response;
+package org.sycamore.llmhub.infrastructure.common;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

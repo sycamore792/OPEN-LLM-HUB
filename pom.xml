@@ -30,6 +30,7 @@
         <mapstruct.binding>0.2.0</mapstruct.binding>
         <projectlombok.version>1.18.32</projectlombok.version>
         <reactor.version>2023.0.0</reactor.version>
+        <dozer-core.version>6.5.2</dozer-core.version>
         <fastjson2.version>2.0.52</fastjson2.version>
         <redisson.version>3.32.0</redisson.version>
         <guava.version>30.0-jre</guava.version>
@@ -48,6 +49,11 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.github.dozermapper</groupId>
+                <artifactId>dozer-core</artifactId>
+                <version>${dozer-core.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.redisson</groupId>

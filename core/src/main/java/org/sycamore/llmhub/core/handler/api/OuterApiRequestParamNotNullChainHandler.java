@@ -25,6 +25,10 @@ public class OuterApiRequestParamNotNullChainHandler implements OuterApiRequestC
         if (StringUtils.isBlank(requestParam.getApiKey())){
             throw new ClientException(APIKEY_PARAMS_BLANK_ERROR);
         }
+        if (!requestParam.getApiKey().startsWith("Bearer ")){
+            throw new ClientException(APIKEY_PARAMS_BLANK_ERROR);
+        }
+        requestParam.setApiKey(requestParam.getApiKey().substring(7));
     }
 
     @Override

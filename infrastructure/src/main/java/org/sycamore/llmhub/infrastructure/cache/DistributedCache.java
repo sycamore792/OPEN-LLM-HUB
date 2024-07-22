@@ -4,6 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.redisson.api.RBloomFilter;
 
+import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -99,4 +100,17 @@ public interface DistributedCache extends Cache {
      * 统计指定 key 的存在数量
      */
     Long countExistingKeys(@NotNull String... keys);
+
+
+
+
+    /**
+     * 设置或刷新Redis键的过期时间。
+     * 如果键已存在，则更新其过期时间；如果键不存在，则设置键值对并添加过期时间。
+     *
+     * @param key 键名
+     * @param value 键值
+     * @param duration 过期时间
+     */
+    Boolean setOrRefreshKey(String key, Object value, Duration duration);
 }

@@ -22,6 +22,12 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.github.dozermapper</groupId>
+            <artifactId>dozer-core</artifactId>
+        </dependency>
+
+        <dependency>
+
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>

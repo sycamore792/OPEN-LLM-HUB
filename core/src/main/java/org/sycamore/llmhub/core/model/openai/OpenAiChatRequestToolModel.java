@@ -1,7 +1,9 @@
 package org.sycamore.llmhub.core.model.openai;
 
+import com.alibaba.fastjson2.JSONObject;
 import lombok.Data;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Sycamore
@@ -43,7 +45,7 @@ public class OpenAiChatRequestToolModel {
     private Function function;
 
 
-    public static OpenAiChatRequestToolModel of(String name, String description, List<String> parameters) {
+    public static OpenAiChatRequestToolModel of(String name, String description, Map<String, Object> parameters) {
         OpenAiChatRequestToolModel tool = new OpenAiChatRequestToolModel();
         Function function = new Function();
         function.setName(name);
@@ -66,9 +68,10 @@ class Function {
     /**
      * 参数列表
      */
-    private List<String> parameters;
+    private Map<String, Object> parameters;
 }
 
 class Parameter {
+
 
 }

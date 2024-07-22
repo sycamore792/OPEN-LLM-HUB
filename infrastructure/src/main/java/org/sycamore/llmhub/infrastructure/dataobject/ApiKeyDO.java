@@ -18,4 +18,5 @@ public class ApiKeyDO extends BaseDO {
     private Long id;
     private Long userId;
     private String apiKey;
+    private String remark;
 }

@@ -32,6 +32,7 @@ public class OuterApiController {
     @PostMapping("/v1/chat/completions")
     @Operation(summary = "chatCompletions")
     public SseEmitter chatCompletions(@RequestHeader("Authorization") String authorization, @RequestBody OpenAiChatRequestModel requestModel) {
+
         ModelRequestCommand command = ModelRequestCommand.builder().requestModel(requestModel).apiKey(authorization).build();
         abstractChainContext.handler(OuterApiChainMarkEnum.OUTER_API_REQUEST_FILTER.name(), command);
         SseEmitter sseEmitter = new SseEmitter(-1L);
@@ -39,11 +40,11 @@ public class OuterApiController {
         return sseEmitter;
     }
 
-    @GetMapping("/v1/models")
-    @Operation(summary = "查看可用的模型列表")
-    public Object getModels(@RequestHeader("Authorization") String authorization) {
-
-        return null;
-    }
+//    @GetMapping("/v1/models")
+//    @Operation(summary = "查看可用的模型列表")
+//    public Object getModels(@RequestHeader("Authorization") String authorization) {
+//
+//        return null;
+//    }
 
 }

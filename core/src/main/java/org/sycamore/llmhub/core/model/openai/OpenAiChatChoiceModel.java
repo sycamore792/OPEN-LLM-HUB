@@ -10,9 +10,8 @@ import lombok.Data;
  * @description: TODO
  */
 @Data
-//@Builder
 public class OpenAiChatChoiceModel {
-//
+
 
     private String logprobs;
 
@@ -21,4 +20,5 @@ public class OpenAiChatChoiceModel {
     private String finishReason;
     private OpenAiMessageModel message;
     private OpenAiMessageModel delta;
+    private OpenAiChatUsageModel usage;
 }

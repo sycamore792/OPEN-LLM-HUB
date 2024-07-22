@@ -1,16 +1,11 @@
 package org.sycamore.llmhub.core.convertor.response;
 
 import com.alibaba.fastjson2.JSON;
-import com.alibaba.fastjson2.annotation.JSONField;
-import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatResponseModel;
 import org.sycamore.llmhub.infrastructure.strategy.AbstractExecuteStrategy;
 
-import java.util.List;
-
-import static com.alibaba.fastjson2.JSONReader.Feature.UseNativeObject;
-import static org.sycamore.llmhub.core.convertor.response.OutApiResponseStrategyMarkEnum.OPEN_AI_CHAT_COMPLETIONS;
+import static org.sycamore.llmhub.infrastructure.common.OutApiResponseStrategyMarkEnum.OPEN_AI_CHAT_COMPLETIONS;
 
 /**
  * @author: Sycamore

@@ -9,8 +9,8 @@ spring:
     password: EasyLink1!
   data:
     redis:
-      host: 123.60.107.45 # Redis?????
-      port: 6379
+      host: 1.94.23.76
+      port: 6666
       password: 'easylink123321'
       lettuce:
         pool:
@@ -25,7 +25,7 @@ mybatis-plus:
     log-impl:  org.apache.ibatis.logging.nologging.NoLoggingImpl
     logPrefix: [ "SQL: ", "SQL_TIME: " ]
 
-
+#
 logging:
   level:
     org.sycamore.llmhub.core.client.ReactorNettyClient: DEBUG
@@ -42,7 +42,7 @@ springdoc:
   group-configs:
     - group: 'default'
       paths-to-match: '/**'
-      packages-to-scan: com.sycamore.nextblog
+      packages-to-scan: org.sycamore.llmhub
 # knife4j的增强配置，不需要增强可以不配
 knife4j:
   enable: true
@@ -50,4 +50,4 @@ knife4j:
     language: zh_cn
 cache:
   redis:
-    prefix: llm_hub
+    prefix: "llm_hub:"

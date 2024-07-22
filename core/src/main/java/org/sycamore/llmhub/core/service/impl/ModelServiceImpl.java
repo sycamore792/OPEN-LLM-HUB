@@ -6,23 +6,21 @@ import com.alibaba.fastjson2.JSONObject;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.springframework.beans.BeanUtils;
-import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyEmitter;
 
 import org.sycamore.llmhub.core.ModelRequestCommand;
 import org.sycamore.llmhub.core.client.ReactorNettyClient;
-import org.sycamore.llmhub.core.convertor.response.OutApiResponseStrategyMarkEnum;
+import org.sycamore.llmhub.infrastructure.common.OutApiResponseStrategyMarkEnum;
 import org.sycamore.llmhub.core.event.ModelLogInsertEvent;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatResponseModel;
 import org.sycamore.llmhub.core.model.openai.OpenAiStreamOptionModel;
 import org.sycamore.llmhub.core.service.ModelServiceI;
 import org.sycamore.llmhub.infrastructure.common.SseEmitter;
+
 import org.sycamore.llmhub.infrastructure.dataobject.ModelLog;
 import org.sycamore.llmhub.infrastructure.dto.resp.SelectModelServerInfoByKeyRespDTO;
 import org.sycamore.llmhub.infrastructure.strategy.AbstractStrategyChoose;
@@ -74,7 +72,7 @@ public class ModelServiceImpl implements ModelServiceI {
         BeanUtils.copyProperties(requestModel, requestModelCopy);
 
         requestModelCopy.setModel(modelServerInfoRespDTO.getModelServerName());
-        if (requestModel.isStream()){
+        if (requestModel.isStream()) {
             requestModelCopy.setStreamOption(new OpenAiStreamOptionModel());
         }
         String body = JSONObject.toJSONString(requestModelCopy);
@@ -82,9 +80,8 @@ public class ModelServiceImpl implements ModelServiceI {
         //响应体公共参数值
         String model = requestModel.getModel();
         long created = System.currentTimeMillis();
-        String id = "chatcmpl-"+ UUID.nameUUIDFromBytes((command.getApiKey()+created+UUID.randomUUID()).getBytes());
+        String id = "chatcmpl-" + UUID.nameUUIDFromBytes((command.getApiKey() + created + UUID.randomUUID()).getBytes());
         log.info("chatCompletions, Authorization：[ {} ]  requestModel: {}", command.getApiKey(), requestModel);
-
 
 
         ModelLog modelLog = new ModelLog();
@@ -92,20 +89,25 @@ public class ModelServiceImpl implements ModelServiceI {
         modelLog.setApiKey(command.getApiKey());
         modelLog.setModelId(modelServerInfoRespDTO.getLlmModelId());
         JSONObject requestJson = new JSONObject();
-        requestJson.put("origin",requestModel);
-        requestJson.put("convert",requestModelCopy);
+        requestJson.put("origin", requestModel);
+        requestJson.put("convert", requestModelCopy);
         modelLog.setRequestJson(requestJson.toJSONString());
         modelLog.setCreated(created);
 
         JSONObject responseJson = new JSONObject();
         JSONArray streamChunksOrigin = new JSONArray();
         JSONArray streamChunksConvert = new JSONArray();
-        if (requestModel.isStream()){
-            responseJson.put("streamChunksOrigin",streamChunksOrigin);
-            responseJson.put("streamChunksConvert",streamChunksConvert);
+        if (requestModel.isStream()) {
+            responseJson.put("streamChunksOrigin", streamChunksOrigin);
+            responseJson.put("streamChunksConvert", streamChunksConvert);
         }
 
+
+
         // 调用模型服务
+        AtomicBoolean isFirstChunk = new AtomicBoolean(false);
+        AtomicBoolean eventConsumeFlag = new AtomicBoolean(false);
+
         Disposable disposable = reactorNettyClient.sendRequest(
                 requestModel.isStream(),
                 url,
@@ -115,9 +117,9 @@ public class ModelServiceImpl implements ModelServiceI {
                     if (!StringUtils.isBlank(event)) {
                         try {
                             log.debug("event:{}", event);
-                            if (!requestModel.isStream()){
-                                responseJson.put("noStreamOrigin",event);
-                            }else {
+                            if (!requestModel.isStream()) {
+                                responseJson.put("noStreamOrigin", event);
+                            } else {
                                 streamChunksOrigin.add(event);
                             }
                             // 加载响应体适配策略
@@ -128,38 +130,103 @@ public class ModelServiceImpl implements ModelServiceI {
                                 response.setModel(model);
                                 response.setId(id);
                                 response.setCreated(created);
-                                if (Objects.nonNull(response.getUsage())){
+                                if (!isFirstChunk.compareAndExchange(false, true) && requestModel.isStream()){
+                                    modelLog.setFirstChunkDelay( (System.currentTimeMillis() - created));
+                                }
+
+
+                                if (Objects.nonNull(response.getUsage())) {
                                     modelLog.setPromptTokens(Long.valueOf(response.getUsage().getPromptTokens()));
                                     modelLog.setCompletionTokens(Long.valueOf(response.getUsage().getCompletionTokens()));
                                     modelLog.setTotalTokens(Long.valueOf(response.getUsage().getTotalTokens()));
+                                }else if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
+                                    modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
+                                    modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
+                                    modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
+
                                 }
-                                if (requestModel.isStream()){
+
+
+                                if (requestModel.isStream()) {
                                     streamChunksConvert.add(response);
+
                                     sseEmitter.send(JSONObject.toJSONString(response));
+
                                     log.debug("response:{}", response);
                                     // 检查 response 和 choices 是否为空，choices 的长度是否大于 0
                                     if (response.isDoneFlag()) {
+                                        if (Objects.nonNull(modelLog.getCompletionTokens())&& modelLog.getCompletionTokens() > 0){
+                                            long cost = System.currentTimeMillis() - created;
+                                            double costInSeconds = cost / 1000.0;
+                                            double l = modelLog.getCompletionTokens() / costInSeconds;
+                                            modelLog.setTps((long) Math.floor(l));
+                                        }
                                         sseEmitter.send("[DONE]");
                                         sseEmitter.complete();
                                     }
                                 } else {
-                                    responseJson.put("noStreamConvert",response);
+                                    responseJson.put("noStreamConvert", response);
+
+                                    if (Objects.nonNull(modelLog.getCompletionTokens())&& modelLog.getCompletionTokens() > 0){
+                                        long cost = System.currentTimeMillis() - created;
+                                        double costInSeconds = cost / 1000.0;
+                                        double l = modelLog.getCompletionTokens() / costInSeconds;
+                                        modelLog.setTps((long) Math.floor(l));
+                                    }
+
                                     sseEmitter.sendBody(JSONObject.toJSONString(response), MediaType.APPLICATION_JSON);
                                     sseEmitter.complete();
                                 }
                             }
-                        } catch (Exception e) {
+                        } catch (IOException e) {
                             // 客户端连接异常，关闭连接
                             log.error("Client connection error", e);
+                            //记录错误日志
+                            modelLog.fillErrorLog(e.getMessage(), Arrays.toString(e.getStackTrace()));
+
+
+                            boolean b = !eventConsumeFlag.compareAndExchange(false, true);
+                            log.info("onComplete:{}", b);
+                            if (b){
+                                modelLog.setResponseJson(responseJson.toJSONString());
+                                ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
+                                applicationEventPublisher.publishEvent(modelLogInsertEvent);
+                            }
                             sseEmitter.complete();
+                        } catch (Exception e) {
+                            // 客户端连接异常，关闭连接
+                            log.error("Server error", e);
+                            modelLog.fillErrorLog(e.getMessage(), Arrays.toString(e.getStackTrace()));
+                            sseEmitter.complete();
+
+
+                            boolean b = !eventConsumeFlag.compareAndExchange(false, true);
+                            log.info("onComplete:{}", b);
+                            if (b){
+                                modelLog.setResponseJson(responseJson.toJSONString());
+                                ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
+                                applicationEventPublisher.publishEvent(modelLogInsertEvent);
+                            }
                         }
                     }
                 },
                 () -> {
-                    // todo 发布完成事件
-                    modelLog.setResponseJson(responseJson.toJSONString());
-                    ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this,modelLog);
-                    applicationEventPublisher.publishEvent(modelLogInsertEvent);
+                    boolean b = !eventConsumeFlag.compareAndExchange(false, true);
+                    log.info("onComplete:{}", b);
+                    if (b){
+                        modelLog.setResponseJson(responseJson.toJSONString());
+                        ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
+                        applicationEventPublisher.publishEvent(modelLogInsertEvent);
+                    }
+                },
+                error->{
+                    boolean b = !eventConsumeFlag.compareAndExchange(false, true);
+                    log.info("onComplete:{}", b);
+                    if (b){
+                        modelLog.setResponseJson(responseJson.toJSONString());
+                        ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
+                        applicationEventPublisher.publishEvent(modelLogInsertEvent);
+                    }
                 }
         );
         // 添加错误处理器

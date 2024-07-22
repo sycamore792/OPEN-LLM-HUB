@@ -18,6 +18,10 @@ public class ModelDO extends BaseDO {
     private Long id;
     private Long authorCompanyId;
     private Long deployCompanyId;
+
+    private int modelType;
+    private int protocolCode;
+
     private String modelName;
     private String modelServerName;
     private String modelServerBaseUrl;

@@ -26,6 +26,7 @@ public class OuterApiRequestParamVerifyChainHandler implements OuterApiRequestCh
 
     private final DistributedCache distributedCache;
     private final ModelMapper modelMapper;
+
     @Override
     public void handler(ModelRequestCommand requestParam) {
         if (!requestParam.getRequestModel().checkValid()) {
@@ -36,7 +37,7 @@ public class OuterApiRequestParamVerifyChainHandler implements OuterApiRequestCh
         String model = requestParam.getRequestModel().getModel();
 
         SelectModelServerInfoByKeyRespDTO modelServerInfo = distributedCache.safeGet(
-                CacheUtil.buildKey("modelServerInfo", apiKey, model),
+                CacheUtil.buildKey("model_server_info", apiKey, model),
                 SelectModelServerInfoByKeyRespDTO.class,
                 () -> {
                     return modelMapper.selectModelServerInfoByKey(apiKey, model).get(0);
@@ -44,7 +45,7 @@ public class OuterApiRequestParamVerifyChainHandler implements OuterApiRequestCh
                 7,
                 TimeUnit.DAYS
         );
-        if (Objects.isNull(modelServerInfo)){
+        if (Objects.isNull(modelServerInfo)) {
             throw new ClientException(MODEL_INFO_VERIFY_ERROR);
         }
         requestParam.setModelServerInfo(modelServerInfo);

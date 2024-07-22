@@ -14,6 +14,7 @@ import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.scripting.support.ResourceScriptSource;
 import org.sycamore.llmhub.infrastructure.common.Singleton;
 
+import java.time.Duration;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -32,6 +33,7 @@ public class StringRedisTemplateProxy implements DistributedCache {
     private final RedissonClient redissonClient;
 
     private static final String LUA_PUT_IF_ALL_ABSENT_SCRIPT_PATH = "lua/putIfAllAbsent.lua";
+    private static final String CHECK_AND_REFRESH_KEY = "lua/checkAndRefreshKey.lua";
     private static final String SAFE_GET_DISTRIBUTED_LOCK_KEY_PREFIX = "safe_get_distributed_lock_get:";
 
     @Override
@@ -183,6 +185,18 @@ public class StringRedisTemplateProxy implements DistributedCache {
     @Override
     public Long countExistingKeys(String... keys) {
         return stringRedisTemplate.countExistingKeys(Lists.newArrayList(keys));
+    }
+
+    @Override
+    public Boolean setOrRefreshKey(String key, Object value, Duration duration) {
+        DefaultRedisScript<Boolean> actual = Singleton.get(CHECK_AND_REFRESH_KEY, () -> {
+            DefaultRedisScript redisScript = new DefaultRedisScript();
+            redisScript.setScriptSource(new ResourceScriptSource(new ClassPathResource(CHECK_AND_REFRESH_KEY)));
+            redisScript.setResultType(Boolean.class);
+            return redisScript;
+        });
+        Boolean result = stringRedisTemplate.execute(actual, Lists.newArrayList(key), JSON.toJSONString(value), String.valueOf(duration.toMillis()));
+        return result != null && result;
     }
 
     private <T> T loadAndSet(String key, CacheLoader<T> cacheLoader, long timeout, TimeUnit timeUnit, boolean safeFlag, RBloomFilter<String> bloomFilter) {

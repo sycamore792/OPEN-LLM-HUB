@@ -1,5 +1,6 @@
 package org.sycamore.llmhub.core.model.openai;
 
+import com.alibaba.fastjson2.annotation.JSONField;
 import lombok.Data;
 
 import java.util.Arrays;
@@ -19,6 +20,21 @@ public class OpenAiMessageModel {
 
     private String role;
     private String content;
+    @JSONField(name = "tool_calls")
+    private List<ToolCall> toolCalls;
+    @Data
+    class ToolCall {
+        private String id;
+
+        private String type;
+        private ToolCallFunction function;
+    }
+
+    @Data
+    class ToolCallFunction {
+        private String name;
+        private String arguments;
+    }
 
     public static OpenAiMessageModel of(String role, String content) {
         OpenAiMessageModel message = new OpenAiMessageModel();
