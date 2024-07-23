@@ -8,14 +8,14 @@
                             <div style="display: flex; align-items: center">
                                 <img :src="scope.row.companyIcon" alt="Icon" class="icon"
                                      style="width: 20px; height: 20px; margin-right: 10px;">
-                                <span>{{ scope.row.companyNameZh }}</span>
+                                <span class="company-name">{{ scope.row.companyNameZh }}</span>
                             </div>
                         </template>
                     </el-table-column>
                     <el-table-column label="Company Name (en)" >
                         <template #default="scope">
                             <div style="display: flex; align-items: center">
-                                <span style="margin-left: 10px">{{ scope.row.companyNameEn }}</span>
+                                <span class="company-name" style="margin-left: 10px">{{ scope.row.companyNameEn }}</span>
                             </div>
                         </template>
                     </el-table-column>
@@ -55,6 +55,10 @@ export default {
 </script>
 
 <style scoped>
+.company-name{
+    font-weight: bolder;
+    font-size: 16px;
+}
 .table-container {
     padding-top: 50px;
     display: flex;

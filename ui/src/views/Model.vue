@@ -228,10 +228,12 @@ export default {
             this.searchData()
         },
         tableRowClassName({row, rowIndex}) {
-            // console.log(row)
-            // if (!row.enableFlag   ) {
-            //     return 'warning-row';
-            // }
+            if (!row.modelHealthyInfo ) {
+                return 'warning-row';
+            }
+            if (!(row.modelHealthyInfo.healthy) || !(row.modelHealthyInfo.healthy === 1)) {
+                return 'warning-row';
+            }
             return ''
         },
         checkModelInfo(row, column, event) {
@@ -281,6 +283,7 @@ export default {
 }
 
 .table-container {
+
     width: 100%;
 }
 
@@ -312,6 +315,6 @@ export default {
     align-items: center;
     flex-wrap: wrap;
     gap: 10px;
-    margin-bottom: 20px;
+    margin: 20px;
 }
 </style>
