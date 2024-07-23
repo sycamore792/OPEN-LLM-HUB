@@ -23,18 +23,9 @@ public class OpenaiChatCompletionsConvert extends AbstractChatCompletionsRespons
     public OpenAiChatResponseModel executeResp(String event) {
         event = doneHandler(event);
         if ("[DONE]".equals(event)){
-            return OpenAiChatResponseModel.stopChoice("1111", 0L, "111", null);
+            return OpenAiChatResponseModel.stopChoice("", 0L, "", null);
         }
         OpenAiChatResponseModel openAiChatResponseModel = JSON.parseObject(event, OpenAiChatResponseModel.class);
-
-//        if ( openAiChatResponseModel.getChoices() != null && !openAiChatResponseModel.getChoices().isEmpty()) {
-//            String finishReason = openAiChatResponseModel.getChoices().get(0).getFinishReason();
-//            if ("stop".equals(finishReason)) {
-//                return OpenAiChatResponseModel.stopChoice("1111", 0L, "111", null);
-//            }
-//        }
-//
-
         return openAiChatResponseModel;
     }
 

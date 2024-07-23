@@ -116,7 +116,6 @@ public class ModelServiceImpl implements ModelServiceI {
                 event -> {
                     if (!StringUtils.isBlank(event)) {
                         try {
-                            log.debug("event:{}", event);
                             if (!requestModel.isStream()) {
                                 responseJson.put("noStreamOrigin", event);
                             } else {
@@ -186,7 +185,6 @@ public class ModelServiceImpl implements ModelServiceI {
 
 
                             boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                            log.info("onComplete:{}", b);
                             if (b){
                                 modelLog.setResponseJson(responseJson.toJSONString());
                                 ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
@@ -201,7 +199,6 @@ public class ModelServiceImpl implements ModelServiceI {
 
 
                             boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                            log.info("onComplete:{}", b);
                             if (b){
                                 modelLog.setResponseJson(responseJson.toJSONString());
                                 ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
@@ -212,7 +209,6 @@ public class ModelServiceImpl implements ModelServiceI {
                 },
                 () -> {
                     boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                    log.info("onComplete:{}", b);
                     if (b){
                         modelLog.setResponseJson(responseJson.toJSONString());
                         ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
@@ -221,7 +217,6 @@ public class ModelServiceImpl implements ModelServiceI {
                 },
                 error->{
                     boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                    log.info("onComplete:{}", b);
                     if (b){
                         modelLog.setResponseJson(responseJson.toJSONString());
                         ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);

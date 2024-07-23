@@ -1,5 +1,6 @@
 package org.sycamore.llmhub.core.client;
 
+import com.alibaba.fastjson2.JSON;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 import io.netty.handler.timeout.ReadTimeoutHandler;
@@ -77,21 +78,18 @@ public class ReactorNettyClient implements BaseClientI {
                 .send((req, outbound) -> outbound.sendString(Flux.just(body)))
                 .responseContent()
                 .asString()
+                .bufferUntil(s -> s.endsWith("\n\n"))  // 缓冲直到遇到消息结束符
+                .map(list -> String.join("", list))    // 合并缓冲的字符串
                 .flatMap(content -> {
                     if (!sseFlag){
                         return Flux.just(content);
                     }
-                    return Flux.fromArray(content.split("data:"));
+                    String[] split = content.split("data: ");
+                    return Flux.fromArray(split);
                 })
                 .doOnComplete(() -> {
                     log.debug("SSE stream completed");
                     onComplete.run();
-                })
-                .doOnEach(signal -> {
-                    if (signal.isOnError()) {
-                        log.error("Error: ", signal.getThrowable());
-
-                    }
                 })
                 .subscribe(
                         event -> {
