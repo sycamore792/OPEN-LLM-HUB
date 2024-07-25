@@ -135,31 +135,33 @@ public class ModelServiceImpl implements ModelServiceI {
                                     modelLog.setFirstChunkDelay( (System.currentTimeMillis() - created));
                                 }
                                 //todo
-//                                Optional.ofNullable(response.getUsage()).ifPresentOrElse(
-//                                        usage -> {
-//                                            Optional.ofNullable(usage.getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
-//                                            Optional.ofNullable(usage.getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
-//                                            Optional.ofNullable(usage.getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
-//                                        },
-//                                        () -> {
-//                                            if (Objects.nonNull(response.getChoices()) && !response.getChoices().isEmpty()) {
-//                                                response.setUsage(new OpenAiChatUsageModel());
-//                                                response.getUsage().setCompletionTokens(response.getChoices().get(0).getMessage().getContent().length());
-//                                                response.getUsage().setPromptTokens(0);
-//                                                response.getUsage().setTotalTokens(response.getUsage().getCompletionTokens());
-//                                            }
-//                                        }
-//                                );
-                                if (Objects.nonNull(response.getUsage())) {
-
-                                    modelLog.setCompletionTokens(Long.valueOf(response.getUsage().getCompletionTokens()));
-                                    modelLog.setTotalTokens(Long.valueOf(response.getUsage().getTotalTokens()));
-                                }else if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
-                                    modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
-                                    modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
-                                    modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
-
-                                }
+                                Optional.ofNullable(response.getUsage()).ifPresentOrElse(
+                                        usage -> {
+                                            Optional.ofNullable(usage.getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
+                                            Optional.ofNullable(usage.getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
+                                            Optional.ofNullable(usage.getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
+                                        },
+                                        () -> {
+                                            if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
+//                                                modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
+//                                                modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
+//                                                modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
+                                            }
+                                        }
+                                );
+//                                if (Objects.nonNull(response.getUsage())) {
+//
+//                                    modelLog.setCompletionTokens(Long.valueOf(response.getUsage().getCompletionTokens()));
+//                                    modelLog.setTotalTokens(Long.valueOf(response.getUsage().getTotalTokens()));
+//                                }else if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
+//                                    modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
+//                                    modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
+//                                    modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
+//
+//                                }
 
 
                                 if (requestModel.isStream()) {
@@ -213,9 +215,9 @@ public class ModelServiceImpl implements ModelServiceI {
                 },
                 () -> {
                     extracted(eventConsumeFlag, modelLog, responseJson);
-
                 },
                 error->{
+                    sseEmitter.complete();
                     extracted(eventConsumeFlag, modelLog, responseJson);
                 }
         );

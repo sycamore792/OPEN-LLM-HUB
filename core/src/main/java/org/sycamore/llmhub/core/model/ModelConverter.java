@@ -20,5 +20,5 @@ public interface ModelConverter {
 
     OpenAiChatResponseModel groq2openaiResponse(GroqOpenAiChatResponseModel person);
 
-    OpenAiChatUsageModel groq2openaiUsage(XGroq person);
+    OpenAiChatUsageModel groq2openaiUsage(GroqOpenAiChatUsageModel person);
 }

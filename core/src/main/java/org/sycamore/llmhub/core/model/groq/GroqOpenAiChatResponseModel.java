@@ -71,8 +71,8 @@ public class GroqOpenAiChatResponseModel implements Covert2OpenAiI {
     public OpenAiChatResponseModel convert() {
         OpenAiChatResponseModel openAiChatResponseModel = ModelConverter.INSTANCE.groq2openaiResponse(this);
 
-        if (Objects.nonNull(this.xGroq)){
-            openAiChatResponseModel.setUsage(ModelConverter.INSTANCE.groq2openaiUsage(this.xGroq));
+        if (Objects.nonNull(this.xGroq)&& Objects.nonNull(this.xGroq.getUsage())){
+            openAiChatResponseModel.setUsage(ModelConverter.INSTANCE.groq2openaiUsage(this.xGroq.getUsage()));
         }else {
             openAiChatResponseModel.setUsage(null);
         }
