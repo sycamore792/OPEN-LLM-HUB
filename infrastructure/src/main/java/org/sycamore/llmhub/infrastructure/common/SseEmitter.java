@@ -150,7 +150,6 @@ public class SseEmitter extends ResponseBodyEmitter {
             if (this.sb == null) {
                 this.sb = new StringBuilder();
             }
-
             this.sb.append(ch);
             return this;
         }

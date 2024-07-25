@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import org.sycamore.llmhub.core.ModelRequestCommand;
 import org.sycamore.llmhub.core.client.ReactorNettyClient;
+import org.sycamore.llmhub.core.model.openai.OpenAiChatUsageModel;
 import org.sycamore.llmhub.infrastructure.common.OutApiResponseStrategyMarkEnum;
 import org.sycamore.llmhub.core.event.ModelLogInsertEvent;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatRequestModel;
@@ -68,6 +69,7 @@ public class ModelServiceImpl implements ModelServiceI {
         OpenAiChatRequestModel requestModel = command.getRequestModel();
 
         // todo 根据协议code加载convert策略 目前默认为openai（模型确实也都是接的openai协议的）所以直接字符串化
+
         OpenAiChatRequestModel requestModelCopy = new OpenAiChatRequestModel();
         BeanUtils.copyProperties(requestModel, requestModelCopy);
 
@@ -80,7 +82,7 @@ public class ModelServiceImpl implements ModelServiceI {
         //响应体公共参数值
         String model = requestModel.getModel();
         long created = System.currentTimeMillis();
-        String id = "chatcmpl-" + UUID.nameUUIDFromBytes((command.getApiKey() + created + UUID.randomUUID()).getBytes());
+        String id = getChatCompletionId(command, created);
         log.info("chatCompletions, Authorization：[ {} ]  requestModel: {}", command.getApiKey(), requestModel);
 
 
@@ -132,10 +134,24 @@ public class ModelServiceImpl implements ModelServiceI {
                                 if (!isFirstChunk.compareAndExchange(false, true) && requestModel.isStream()){
                                     modelLog.setFirstChunkDelay( (System.currentTimeMillis() - created));
                                 }
-
-
+                                //todo
+//                                Optional.ofNullable(response.getUsage()).ifPresentOrElse(
+//                                        usage -> {
+//                                            Optional.ofNullable(usage.getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
+//                                            Optional.ofNullable(usage.getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
+//                                            Optional.ofNullable(usage.getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
+//                                        },
+//                                        () -> {
+//                                            if (Objects.nonNull(response.getChoices()) && !response.getChoices().isEmpty()) {
+//                                                response.setUsage(new OpenAiChatUsageModel());
+//                                                response.getUsage().setCompletionTokens(response.getChoices().get(0).getMessage().getContent().length());
+//                                                response.getUsage().setPromptTokens(0);
+//                                                response.getUsage().setTotalTokens(response.getUsage().getCompletionTokens());
+//                                            }
+//                                        }
+//                                );
                                 if (Objects.nonNull(response.getUsage())) {
-                                    modelLog.setPromptTokens(Long.valueOf(response.getUsage().getPromptTokens()));
+
                                     modelLog.setCompletionTokens(Long.valueOf(response.getUsage().getCompletionTokens()));
                                     modelLog.setTotalTokens(Long.valueOf(response.getUsage().getTotalTokens()));
                                 }else if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
@@ -151,7 +167,6 @@ public class ModelServiceImpl implements ModelServiceI {
 
                                     sseEmitter.send(JSONObject.toJSONString(response));
 
-                                    log.debug("response:{}", response);
                                     // 检查 response 和 choices 是否为空，choices 的长度是否大于 0
                                     if (response.isDoneFlag()) {
                                         if (Objects.nonNull(modelLog.getCompletionTokens())&& modelLog.getCompletionTokens() > 0){
@@ -182,14 +197,7 @@ public class ModelServiceImpl implements ModelServiceI {
                             log.error("Client connection error", e);
                             //记录错误日志
                             modelLog.fillErrorLog(e.getMessage(), Arrays.toString(e.getStackTrace()));
-
-
-                            boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                            if (b){
-                                modelLog.setResponseJson(responseJson.toJSONString());
-                                ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
-                                applicationEventPublisher.publishEvent(modelLogInsertEvent);
-                            }
+                            extracted(eventConsumeFlag, modelLog, responseJson);
                             sseEmitter.complete();
                         } catch (Exception e) {
                             // 客户端连接异常，关闭连接
@@ -198,30 +206,17 @@ public class ModelServiceImpl implements ModelServiceI {
                             sseEmitter.complete();
 
 
-                            boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                            if (b){
-                                modelLog.setResponseJson(responseJson.toJSONString());
-                                ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
-                                applicationEventPublisher.publishEvent(modelLogInsertEvent);
-                            }
+                            extracted(eventConsumeFlag, modelLog, responseJson);
+
                         }
                     }
                 },
                 () -> {
-                    boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                    if (b){
-                        modelLog.setResponseJson(responseJson.toJSONString());
-                        ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
-                        applicationEventPublisher.publishEvent(modelLogInsertEvent);
-                    }
+                    extracted(eventConsumeFlag, modelLog, responseJson);
+
                 },
                 error->{
-                    boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-                    if (b){
-                        modelLog.setResponseJson(responseJson.toJSONString());
-                        ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
-                        applicationEventPublisher.publishEvent(modelLogInsertEvent);
-                    }
+                    extracted(eventConsumeFlag, modelLog, responseJson);
                 }
         );
         // 添加错误处理器
@@ -236,5 +231,19 @@ public class ModelServiceImpl implements ModelServiceI {
             disposable.dispose();
         });
 
+    }
+
+    private static String getChatCompletionId(ModelRequestCommand command, long created) {
+        String id = "chatcmpl-" + UUID.nameUUIDFromBytes((command.getApiKey() + created + UUID.randomUUID()).getBytes());
+        return id;
+    }
+
+    private void extracted(AtomicBoolean eventConsumeFlag, ModelLog modelLog, JSONObject responseJson) {
+        boolean b = !eventConsumeFlag.compareAndExchange(false, true);
+        if (b){
+            modelLog.setResponseJson(responseJson.toJSONString());
+            ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
+            applicationEventPublisher.publishEvent(modelLogInsertEvent);
+        }
     }
 }

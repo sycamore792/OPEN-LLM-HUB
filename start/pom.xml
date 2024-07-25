@@ -23,6 +23,11 @@
         </dependency>
         <dependency>
             <groupId>org.sycamore</groupId>
+            <artifactId>llm-hub-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.sycamore</groupId>
             <artifactId>llm-hub-core</artifactId>
         </dependency>
     </dependencies>

@@ -60,11 +60,11 @@ public class ReactorNettyClient implements BaseClientI {
 
     private static ConnectionProvider createConnectionProvider() {
         return ConnectionProvider.builder("custom")
-                .maxConnections(50)  // 设置最大连接数
+                .maxConnections(500)  // 设置最大连接数
                 .pendingAcquireMaxCount(100)  // 设置最大等待队列长度
-                .pendingAcquireTimeout(Duration.ofSeconds(30))  // 设置最大等待时间
+                .pendingAcquireTimeout(Duration.ofSeconds(20))  // 设置最大等待时间
                 .maxIdleTime(Duration.ofSeconds(20))  // 设置最大空闲时间
-                .maxLifeTime(Duration.ofMinutes(2))  // 设置连接的最大生存时间
+                .maxLifeTime(Duration.ofMinutes(3))  // 设置连接的最大生存时间
                 .build();
     }
 
@@ -93,8 +93,8 @@ public class ReactorNettyClient implements BaseClientI {
                 })
                 .subscribe(
                         event -> {
+                            log.debug("Received event: {}", event);
                             if (!StringUtils.isBlank(event)){
-                                log.debug("Received event: {}", event);
                                 eventHandler.accept(event);
                             }
                         },
