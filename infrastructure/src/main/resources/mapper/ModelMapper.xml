@@ -4,6 +4,27 @@
 
 
 <mapper namespace="org.sycamore.llmhub.infrastructure.dataobject.mapper.ModelMapper">
+    <select id="listModelWithCompanyInfoByApiKey"  resultType="org.sycamore.llmhub.infrastructure.dto.resp.ModelWithCompanyInfoRespDTO">
+        SELECT m.id,
+               m.model_name,
+               m.create_time,
+               m.model_server_base_url,
+               a.company_name_zh AS author_company_name_zh,
+               d.company_name_zh AS deploy_company_name_zh
+        FROM model_llm m
+                 INNER JOIN
+             model_company a ON m.author_company_id = a.id
+                 INNER JOIN
+             model_company d ON m.deploy_company_id = d.id
+                 INNER JOIN
+             api_key_model k ON m.id = k.llm_model_id
+        WHERE m.del_flag = 0
+          AND a.del_flag = 0
+          AND d.del_flag = 0
+          AND k.del_flag = 0
+          AND k.api_key = #{apiKey}
+        order by m.create_time desc
+    </select>
 
 
     <select id="listModelWithCompanyInfo" parameterType="org.sycamore.llmhub.infrastructure.dto.req.ModelPageQueryReqDTO"  resultType="org.sycamore.llmhub.infrastructure.dto.resp.ModelWithCompanyInfoRespDTO">

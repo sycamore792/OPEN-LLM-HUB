@@ -72,4 +72,18 @@ public class ModelBaseServiceImpl extends ServiceImpl<ModelMapper, ModelDO> impl
         }
         return PageUtil.convert(pageResult);
     }
+
+    @Override
+    public PageResponse modelListPageQueryByApiKey(Integer pageNum, Integer pageSize,String apiKey) {
+        Page<ModelDO> page = new Page<>(pageNum, pageSize);
+
+        Page<ModelWithCompanyInfoRespDTO> pageResult = this.baseMapper.listModelWithCompanyInfoByApiKey(page, apiKey);
+//        for (ModelWithCompanyInfoRespDTO record : pageResult.getRecords()) {
+//            ModelHealthyRespDTO modelHealthy = distributedCache.get(CacheUtil.buildKey("model_healthy", record.getId().toString()), ModelHealthyRespDTO.class);
+//            if (modelHealthy != null) {
+//                record.setModelHealthyInfo(modelHealthy);
+//            }
+//        }
+        return PageUtil.convert(pageResult);
+    }
 }

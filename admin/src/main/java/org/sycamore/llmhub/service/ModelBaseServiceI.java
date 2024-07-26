@@ -15,4 +15,5 @@ public interface ModelBaseServiceI extends IService<ModelDO> {
     ModelInfoRespDTO getModelDetailById(Long id);
 
     PageResponse modelListPageQuery(Integer pageNum, Integer pageSize, ModelPageQueryReqDTO reqDTO);
+    PageResponse modelListPageQueryByApiKey(Integer pageNum, Integer pageSize,String apiKey);
 }

@@ -40,6 +40,12 @@ public interface ModelMapper extends BaseMapper<ModelDO> {
 
     ModelWithCompanyInfoRespDTO selectModelBaseInfoById(@Param("id") Long id);
 
+
+    Page<ModelWithCompanyInfoRespDTO> listModelWithCompanyInfoByApiKey(Page<ModelDO> page, @Param("apiKey") String apiKey);
+
+
+
+
     @Select("""
 select l.id, t.type_name as model_type, t.remark as model_type_desc, l.protocol_code, l.remark as remark
 from (select * from model_llm where id = #{id}) l
