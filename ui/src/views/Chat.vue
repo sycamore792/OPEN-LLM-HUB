@@ -1,10 +1,12 @@
 <template>
     <div class="chat-container">
+
         <div class="header">
             <div style="display: inline-block;">
                 <img style="width: 40px;" src="@/assets/logo_white.png">
                 <h2 style="display: inline;vertical-align: middle;">Playground </h2>
                 <span style="padding-left: 10px; padding-right: 10px">模型</span>
+                {{modelName}}
                 <el-select
                     clearable
                     v-model="modelName"
@@ -18,7 +20,7 @@
                         v-for="item in modelList"
                         :key="item.id"
                         :label="item.modelName"
-                        :value="item"
+                        :value="item.modelName"
                     >
                         {{ item.modelName }}
                     </el-option>
@@ -53,18 +55,20 @@
                 <div class="input-area" v-loading="inputLoading"  element-loading-background="rgba(0,0,0,0.5)">
                     <div class="send-role" @click="switchSendRole">{{ this.sendRole }}</div>
                     <input type="text" v-model="userMessage" class="send-input">
-                    <button class="send-button" @click="sendMessage"><img src="@/assets/Arrow_Top.png"></button>
+                    <button v-show="modelName!==''"  class="send-button" @click="sendMessage"><img src="@/assets/Arrow_Top.png"></button>
                 </div>
             </div>
             <div class="setting-area">
                 <div class="slider-container">
                     <label for="temperature">Temperature</label>
+
                     <input type="range" id="temperature" v-model="temperature.value" :min="temperature.minValue"
                            :max="temperature.maxValue" :step="temperature.step">
                     <span class="slider-value">{{ temperature.value }}</span>
                 </div>
                 <div class="slider-container">
                     <label for="max-tokens">Max Tokens</label>
+
                     <input type="range" id="max-tokens" v-model="maxTokens.value" :min="maxTokens.minValue"
                            :max="maxTokens.maxValue" :step="maxTokens.step">
                     <span class="slider-value">{{ maxTokens.value }}</span>
@@ -76,12 +80,14 @@
 
 <script>
 import {fetchEventSource} from "@microsoft/fetch-event-source";
+import keyApi from "@/api/KeyApi";
 
 export default {
     name: "Chat",
     data() {
         return {
-            modelList: [],
+            modelList: [
+            ],
             modelName: '',
             apiKey:"",
             inputLoading:false,
@@ -104,9 +110,14 @@ export default {
         }
     },
     methods: {
+        getModelList(apiKey) {
+            keyApi.getModelPageList(1, 100,apiKey).then(res => {
+                this.modelList = res.data.records
+
+            })
+        },
         onModelChange() {
             // 当选择的模型改变时，可以在这里添加一些逻辑
-            console.log('Selected model:', this.selectedModel);
             // 可以根据选择的模型更新其他设置，比如 maxTokens
             if (this.selectedModel) {
                 this.maxTokens.maxValue = this.selectedModel.maxTokens || 4096;
@@ -138,7 +149,8 @@ export default {
                 body: JSON.stringify({
                     "model": _this.modelName,
                     "messages": msgList,
-                    "temperature": 0.3,
+                    "temperature": _this.temperature.value,
+                    "max_tokens": _this.maxTokens.value,
                     "stream": true
                 }),
                 signal: ctrl.signal,
@@ -194,7 +206,11 @@ export default {
     created() {
         //获取用户id
         this.apiKey = this.$route.params.apiKey;
+
     },
+    mounted() {
+        this.getModelList(this.apiKey);
+    }
 }
 </script>
 
