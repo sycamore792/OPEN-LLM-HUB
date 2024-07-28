@@ -25,6 +25,11 @@ const routes = [
       component: () => import('@/views/ApiKey.vue')
     },
     ]
+  },{
+    path: '/chat/:apiKey',
+    name: 'Chat',
+    component: () => import('@/views/Chat.vue'),
+
   }
 ]
 

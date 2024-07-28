@@ -92,7 +92,7 @@
                             </div>
                         </template>
                     </el-table-column>
-                    <el-table-column label="状态" width="400px">
+                    <el-table-column fixed="right" label="状态" width="300px">
                         <template #default="scope">
                             <div style="display: flex; align-items: center">
                                 <span :class="['status-dot',scope.row.modelHealthyInfo ? (scope.row.modelHealthyInfo.healthy == 1?'enabled':'disabled') : 'unknown'    ]"></span>

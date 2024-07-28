@@ -1,4 +1,5 @@
 import axiosInstance from '@/api/BaseApi';
+import { fetchEventSource } from "@microsoft/fetch-event-source";
 
 export default {
 
@@ -8,8 +9,8 @@ export default {
     },
     // 获取模型列表
     getModelPageList(
-        pageNum=1,
-        pageSize=10,
+        pageNum = 1,
+        pageSize = 10,
         modelName = "",
         deployCompanyId = "",
         authorCompanyId = "",
@@ -22,4 +23,27 @@ export default {
         return axiosInstance.get(`/model/${id}`);
     },
 
+    chatCompletion({
+                       model = "",
+                       messages = [{
+                           role: '',
+                           content: ''
+                       }],
+                       temperature = 0.7,
+                       max_tokens = 2048,
+                       apiKey = ""
+                   }) {
+        // 设置请求头
+        const token =  `Bearer ${apiKey}`;
+        return axiosInstance.post(`/v1/chat/completions`, {
+            model,
+            messages,
+            temperature,
+            max_tokens,
+        }, {
+            headers: {
+                'Authorization': token
+            }
+        })
+    }
 };

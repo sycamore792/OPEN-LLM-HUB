@@ -8,7 +8,7 @@
                         <!-- 可以根据需要添加控件 -->
                     </div>
                     <div :ref="el => { if (el) chartRefs[index] = el }"
-                         style="margin: auto ;width: 800px; height: 400px;padding: 20px"></div>
+                         style="margin: auto ;width: 1200px; height: 400px;padding: 20px"></div>
                 </div>
             </div>
         </div>
@@ -53,27 +53,22 @@ export default {
                     }
                 },
                 {
-                    title: '模型',
+                    title: '模型推理概况',
                     option: {
-
                         // 鼠标移入显示的东西
                         tooltip: {
                             trigger: 'item',
                             formatter: '{a} <br/>{b} : {c} ({d}%)'
                         },
                         legend: {
-                            left: 'center',
-                            top: 'bottom',
-                            data: [
-                                'rose1',
-                                'rose2',
-                                'rose3',
-                                'rose4',
-                                'rose5',
-                                'rose6',
-                                'rose7',
-                                'rose8'
-                            ]
+                            orient: 'vertical',
+                            left: '55%',
+                            top: 'middle',
+                            itemWidth: 15,
+                            itemHeight: 15,
+                            textStyle: {
+                                fontSize: 15
+                            }
                         },
                         toolbox: {
                             show: false,
@@ -92,8 +87,10 @@ export default {
                                 // 光标移入显示的东西
                                 name: '模型实例推理次数',
                                 type: 'pie',
-                                radius: [40, 140],
+                                radius: ['30%', '90%'],
                                 center: ['25%', '50%'],
+                                // radius: [40, 140],
+                                // center: ['25%', '50%'],
                                 roseType: 'radius',
                                 itemStyle: {
                                     // 图表圆角尺度
@@ -111,14 +108,7 @@ export default {
                                     }
                                 },
                                 data: [
-                                    {value: 40, name: 'rose 1'},
-                                    {value: 33, name: 'rose 2'},
-                                    {value: 28, name: 'rose 3'},
-                                    {value: 22, name: 'rose 4'},
-                                    {value: 20, name: 'rose 5'},
-                                    {value: 15, name: 'rose 6'},
-                                    {value: 12, name: 'rose 7'},
-                                    {value: 10, name: 'rose 8'}
+
                                 ]
                             },
                         ]

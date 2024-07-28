@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.1",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "axios": "^1.7.2",
     "echarts": "^5.5.1",
     "element-plus": "^2.7.7",

@@ -1,0 +1,146 @@
+.markdown-body {
+	background-color: transparent;
+	font-size: 14px;
+
+	p {
+		white-space: pre-wrap;
+	}
+
+	ol {
+		list-style-type: decimal;
+	}
+
+	ul {
+		list-style-type: disc;
+	}
+
+	pre code,
+	pre tt {
+		line-height: 1.65;
+	}
+
+	.highlight pre,
+	pre {
+		background-color: #fff;
+	}
+
+	code.hljs {
+		padding: 0;
+	}
+
+	.code-block {
+		&-wrapper {
+			position: relative;
+			padding-top: 24px;
+		}
+
+		&-header {
+			position: absolute;
+			top: 5px;
+			right: 0;
+			width: 100%;
+			padding: 0 1rem;
+			display: flex;
+			justify-content: flex-end;
+			align-items: center;
+			color: #b3b3b3;
+
+			&__copy {
+				cursor: pointer;
+				margin-left: 0.5rem;
+				user-select: none;
+
+				&:hover {
+					color: #65a665;
+				}
+			}
+		}
+	}
+
+}
+
+.markdown-body {
+	background-color: transparent;
+	font-size: 14px;
+}
+
+.markdown-body p {
+	white-space: pre-wrap;
+}
+
+.markdown-body ol {
+	list-style-type: decimal;
+}
+
+.markdown-body ul {
+	list-style-type: disc;
+}
+
+.markdown-body pre code,
+.markdown-body pre tt {
+	line-height: 1.65;
+}
+
+.markdown-body .highlight pre,
+.markdown-body pre {
+	background-color: #fff;
+}
+
+.markdown-body code.hljs {
+	padding: 0;
+}
+
+.markdown-body .code-block-wrapper {
+	position: relative;
+	padding-top: 24px
+}
+
+.markdown-body .code-block-header {
+	position: absolute;
+	top: 5px;
+	right: 0;
+	width: 100%;
+	padding: 0 1rem;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	color: #b3b3b3;
+}
+
+.markdown-body .code-block-header__copy {
+	cursor: pointer;
+	margin-left: .5rem;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+.markdown-body .code-block-header__copy:hover {
+	color: #65a665;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+	font-weight: 400;
+}
+
+.markdown-body a {
+
+	color: var(--e-markdown-a-color);
+}
+
+
+.markdown-body kbd {
+	padding: 16px;
+	font-size: 14px;
+}
+
+.markdown-body.mb kbd {
+	padding: 16px;
+	font-size: 20px;
+	line-height: 26px;
+}
