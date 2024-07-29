@@ -28,6 +28,7 @@ public enum BaseErrorCode implements IErrorCode {
     APIKEY_PARAMS_BLANK_ERROR("A000301", "缺少api key"),
     REQUEST_BODY_VERIFY_ERROR("A000302", "非法请求体"),
     MODEL_INFO_VERIFY_ERROR("A000303", "模型不存在"),
+    MODEL_PARAMS_BLANK_ERROR("A000304", "模型不可为空"),
 
 
 

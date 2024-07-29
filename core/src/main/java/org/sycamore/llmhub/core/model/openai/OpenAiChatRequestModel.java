@@ -1,6 +1,7 @@
 package org.sycamore.llmhub.core.model.openai;
 
 import com.alibaba.fastjson2.annotation.JSONField;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.util.HashMap;
@@ -21,19 +22,23 @@ public class OpenAiChatRequestModel {
     private String model;
     private List<OpenAiMessageModel> messages;
     @JSONField(name = "max_tokens")
+    @JsonProperty("max_tokens")
     private Long maxTokens;
     private Double temperature;
     @JSONField(name = "top_p")
+    @JsonProperty("top_p")
     private Double topP;
     /**
      * <p>介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其是否已在已有文本中出现受到相应的惩罚，从而增加模型谈论新主题的可能性。</p>
      */
     @JSONField(name = "presence_penalty")
+    @JsonProperty("presence_penalty")
     private Double presencePenalty;
     /**
      * <p>介于 -2.0 和 2.0 之间的数字。如果该值为正，那么新 token 会根据其在已有文本中的出现频率受到相应的惩罚，降低模型重复相同内容的可能性。</p>
      */
     @JSONField(name = "frequency_penalty")
+    @JsonProperty("frequency_penalty")
     private Double frequencyPenalty;
     private List<String> stop;
     private Integer n;
@@ -44,6 +49,7 @@ public class OpenAiChatRequestModel {
 
     private String user;
     @JSONField(name = "stream_options")
+    @JsonProperty("stream_options")
     private OpenAiStreamOptionModel streamOption;
 
 

@@ -5,8 +5,7 @@ import org.springframework.stereotype.Component;
 import org.sycamore.llmhub.core.ModelRequestCommand;
 import org.sycamore.llmhub.infrastructure.exception.ClientException;
 
-import static org.sycamore.llmhub.infrastructure.exception.BaseErrorCode.APIKEY_PARAMS_BLANK_ERROR;
-import static org.sycamore.llmhub.infrastructure.exception.BaseErrorCode.REQUEST_PARAMS_EMPTY_ERROR;
+import static org.sycamore.llmhub.infrastructure.exception.BaseErrorCode.*;
 
 /**
  * @author: Sycamore
@@ -21,6 +20,9 @@ public class OuterApiRequestParamNotNullChainHandler implements OuterApiRequestC
     public void handler(ModelRequestCommand requestParam) {
         if (requestParam.getRequestModel() == null) {
             throw new ClientException(REQUEST_PARAMS_EMPTY_ERROR);
+        }
+        if (StringUtils.isBlank(requestParam.getRequestModel().getModel())){
+            throw new ClientException(MODEL_PARAMS_BLANK_ERROR);
         }
         if (StringUtils.isBlank(requestParam.getApiKey())){
             throw new ClientException(APIKEY_PARAMS_BLANK_ERROR);
