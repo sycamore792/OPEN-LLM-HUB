@@ -105,7 +105,6 @@ public class ModelServiceImpl implements ModelServiceI {
         }
 
 
-
         // 调用模型服务
         AtomicBoolean isFirstChunk = new AtomicBoolean(false);
         AtomicBoolean eventConsumeFlag = new AtomicBoolean(false);
@@ -131,38 +130,23 @@ public class ModelServiceImpl implements ModelServiceI {
                                 response.setModel(model);
                                 response.setId(id);
                                 response.setCreated(created);
-                                if (!isFirstChunk.compareAndExchange(false, true) && requestModel.isStream()){
-                                    modelLog.setFirstChunkDelay( (System.currentTimeMillis() - created));
+                                if (!isFirstChunk.compareAndExchange(false, true) && requestModel.isStream()) {
+                                    modelLog.setFirstChunkDelay((System.currentTimeMillis() - created));
                                 }
-                                //todo
                                 Optional.ofNullable(response.getUsage()).ifPresentOrElse(
                                         usage -> {
-                                            Optional.ofNullable(usage.getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
-                                            Optional.ofNullable(usage.getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
-                                            Optional.ofNullable(usage.getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
+                                            Optional.ofNullable(usage.getPromptTokens()).ifPresent(promptTokens -> modelLog.setPromptTokens(Long.valueOf(promptTokens)));
+                                            Optional.ofNullable(usage.getCompletionTokens()).ifPresent(completionTokens -> modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
+                                            Optional.ofNullable(usage.getTotalTokens()).ifPresent(totalTokens -> modelLog.setTotalTokens(Long.valueOf(totalTokens)));
                                         },
                                         () -> {
-                                            if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
-                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getPromptTokens()).ifPresent(promptTokens->modelLog.setPromptTokens(Long.valueOf(promptTokens)));
-                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getCompletionTokens()).ifPresent(completionTokens->modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
-                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getTotalTokens()).ifPresent(totalTokens->modelLog.setTotalTokens(Long.valueOf(totalTokens)));
-//                                                modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
-//                                                modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
-//                                                modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
+                                            if (Objects.nonNull(response.getChoices()) && !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())) {
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getPromptTokens()).ifPresent(promptTokens -> modelLog.setPromptTokens(Long.valueOf(promptTokens)));
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getCompletionTokens()).ifPresent(completionTokens -> modelLog.setCompletionTokens(Long.valueOf(completionTokens)));
+                                                Optional.ofNullable(response.getChoices().get(0).getUsage().getTotalTokens()).ifPresent(totalTokens -> modelLog.setTotalTokens(Long.valueOf(totalTokens)));
                                             }
                                         }
                                 );
-//                                if (Objects.nonNull(response.getUsage())) {
-//
-//                                    modelLog.setCompletionTokens(Long.valueOf(response.getUsage().getCompletionTokens()));
-//                                    modelLog.setTotalTokens(Long.valueOf(response.getUsage().getTotalTokens()));
-//                                }else if (Objects.nonNull(response.getChoices())&& !response.getChoices().isEmpty() && Objects.nonNull(response.getChoices().get(0).getUsage())){
-//                                    modelLog.setPromptTokens(Long.valueOf(response.getChoices().get(0).getUsage().getPromptTokens()));
-//                                    modelLog.setCompletionTokens(Long.valueOf(response.getChoices().get(0).getUsage().getCompletionTokens()));
-//                                    modelLog.setTotalTokens(Long.valueOf(response.getChoices().get(0).getUsage().getTotalTokens()));
-//
-//                                }
-
 
                                 if (requestModel.isStream()) {
                                     streamChunksConvert.add(response);
@@ -171,7 +155,7 @@ public class ModelServiceImpl implements ModelServiceI {
 
                                     // 检查 response 和 choices 是否为空，choices 的长度是否大于 0
                                     if (response.isDoneFlag()) {
-                                        if (Objects.nonNull(modelLog.getCompletionTokens())&& modelLog.getCompletionTokens() > 0){
+                                        if (Objects.nonNull(modelLog.getCompletionTokens()) && modelLog.getCompletionTokens() > 0) {
                                             long cost = System.currentTimeMillis() - created;
                                             double costInSeconds = cost / 1000.0;
                                             double l = modelLog.getCompletionTokens() / costInSeconds;
@@ -183,7 +167,7 @@ public class ModelServiceImpl implements ModelServiceI {
                                 } else {
                                     responseJson.put("noStreamConvert", response);
 
-                                    if (Objects.nonNull(modelLog.getCompletionTokens())&& modelLog.getCompletionTokens() > 0){
+                                    if (Objects.nonNull(modelLog.getCompletionTokens()) && modelLog.getCompletionTokens() > 0) {
                                         long cost = System.currentTimeMillis() - created;
                                         double costInSeconds = cost / 1000.0;
                                         double l = modelLog.getCompletionTokens() / costInSeconds;
@@ -216,7 +200,7 @@ public class ModelServiceImpl implements ModelServiceI {
                 () -> {
                     extracted(eventConsumeFlag, modelLog, responseJson);
                 },
-                error->{
+                error -> {
                     sseEmitter.complete();
                     extracted(eventConsumeFlag, modelLog, responseJson);
                 }
@@ -242,7 +226,7 @@ public class ModelServiceImpl implements ModelServiceI {
 
     private void extracted(AtomicBoolean eventConsumeFlag, ModelLog modelLog, JSONObject responseJson) {
         boolean b = !eventConsumeFlag.compareAndExchange(false, true);
-        if (b){
+        if (b) {
             modelLog.setResponseJson(responseJson.toJSONString());
             ModelLogInsertEvent modelLogInsertEvent = new ModelLogInsertEvent(this, modelLog);
             applicationEventPublisher.publishEvent(modelLogInsertEvent);

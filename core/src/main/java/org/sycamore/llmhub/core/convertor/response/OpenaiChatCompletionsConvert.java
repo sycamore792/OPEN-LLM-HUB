@@ -5,6 +5,9 @@ import org.springframework.stereotype.Component;
 import org.sycamore.llmhub.core.model.openai.OpenAiChatResponseModel;
 import org.sycamore.llmhub.infrastructure.strategy.AbstractExecuteStrategy;
 
+import java.util.Objects;
+import java.util.Optional;
+
 import static org.sycamore.llmhub.infrastructure.common.OutApiResponseStrategyMarkEnum.OPEN_AI_CHAT_COMPLETIONS;
 
 /**
@@ -26,6 +29,9 @@ public class OpenaiChatCompletionsConvert extends AbstractChatCompletionsRespons
             return OpenAiChatResponseModel.stopChoice("", 0L, "", null);
         }
         OpenAiChatResponseModel openAiChatResponseModel = JSON.parseObject(event, OpenAiChatResponseModel.class);
+        if (Objects.nonNull(openAiChatResponseModel.getChoices()) && !openAiChatResponseModel.getChoices().isEmpty() && Objects.nonNull(openAiChatResponseModel.getChoices().get(0).getUsage())) {
+           openAiChatResponseModel.setUsage(openAiChatResponseModel.getChoices().get(0).getUsage());
+        }
         return openAiChatResponseModel;
     }
 
