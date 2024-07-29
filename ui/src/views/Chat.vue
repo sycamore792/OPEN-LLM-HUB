@@ -6,21 +6,21 @@
                 <img style="width: 40px;" src="@/assets/logo_white.png">
                 <h2 style="display: inline;vertical-align: middle;">Playground </h2>
                 <span style="padding-left: 10px; padding-right: 10px">模型</span>
-                {{modelName}}
+
                 <el-select
-                    clearable
-                    v-model="modelName"
-                    @change="onModelChange"
-                    value-key="id"
-                    placeholder="请选择模型"
-                    effect="dark"
-                    style="width: 240px"
+                        clearable
+                        v-model="modelName"
+                        @change="onModelChange"
+                        value-key="id"
+                        placeholder="请选择模型"
+                        effect="dark"
+                        style="width: 240px"
                 >
                     <el-option
-                        v-for="item in modelList"
-                        :key="item.id"
-                        :label="item.modelName"
-                        :value="item.modelName"
+                            v-for="item in modelList"
+                            :key="item.id"
+                            :label="item.modelName"
+                            :value="item.modelName"
                     >
                         {{ item.modelName }}
                     </el-option>
@@ -29,33 +29,37 @@
         </div>
         <div class="content-area">
             <div class="chat-area">
-                <div class="message-area">
+                <div class="message-area" ref="messageArea" @scroll="onScroll">
                     <div class="message">
                         <span class="role">system</span>
-                        <div contenteditable="true" v-html="systemMsg" class="content-input"
-                             @input="updateSystemMsg"></div>
+                        <div
+                            class="content-input"
+                            contenteditable="true"
+                            @input="updateSystemMsg($event)"
+                            @blur="onBlur($event)"
+                            v-html="systemMsg"
+                        ></div>
                     </div>
-                    <div v-for="(item, index) in messages" :key="index" class="message" >
+                    <div v-for="(item, index) in messages" :key="index" class="message">
                         <span class="role">{{ item.role }}</span>
-                        <div contenteditable="true" @input="updateMessageContent(item)"   class="content-input">
-                            <transition-group name="fade">
-                                <div>
-                                    {{item.content}}
-                                </div>
-<!--                            <span v-for="(char, index) in item.content" :key="index" class="chat-word">-->
-<!--                                {{ char }}-->
-<!--                            </span>-->
-                            </transition-group>
-
-                        </div>
-                        <img class="delete-icon" alt="" src="@/assets/delete_icon.png"
-                             @click="messages.splice(index, 1)">
+                        <div
+                            class="content-input"
+                            contenteditable="true"
+                            @input="updateMessageContent($event, item)"
+                            @blur="onBlur($event)"
+                            v-html="item.content"
+                        ></div>
+                        <img class="delete-icon" alt="" src="@/assets/delete_icon.png" @click="messages.splice(index, 1)">
                     </div>
+                    <button v-show="showScrollButton" @click="scrollToBottom" class="scroll-to-bottom">
+                        ↓ 滚动到底部
+                    </button>
                 </div>
-                <div class="input-area" v-loading="inputLoading"  element-loading-background="rgba(0,0,0,0.5)">
+                <div class="input-area" v-loading="inputLoading" element-loading-background="rgba(0,0,0,0.5)">
                     <div class="send-role" @click="switchSendRole">{{ this.sendRole }}</div>
                     <input type="text" v-model="userMessage" class="send-input">
-                    <button v-show="modelName!==''"  class="send-button" @click="sendMessage"><img src="@/assets/Arrow_Top.png"></button>
+                    <button v-show="modelName!==''" class="send-button" @click="sendMessage"><img
+                        src="@/assets/Arrow_Top.png"></button>
                 </div>
             </div>
             <div class="setting-area">
@@ -81,16 +85,17 @@
 <script>
 import {fetchEventSource} from "@microsoft/fetch-event-source";
 import keyApi from "@/api/KeyApi";
+import baseApi from "@/api/BaseApi";
+import axiosInstance from "@/api/BaseApi";
 
 export default {
     name: "Chat",
     data() {
         return {
-            modelList: [
-            ],
+            modelList: [],
             modelName: '',
-            apiKey:"",
-            inputLoading:false,
+            apiKey: "",
+            inputLoading: false,
             systemMsg: "这是一个系统提示",
             userMessage: "",
             sendRole: "user",
@@ -107,11 +112,22 @@ export default {
                 value: 1024
             },
             messages: [],
+            showScrollButton: false,
         }
     },
     methods: {
+        onScroll() {
+            const element = this.$refs.messageArea;
+            const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100; // 添加一些容差
+            this.showScrollButton = !atBottom;
+        },
+        scrollToBottom() {
+            const element = this.$refs.messageArea;
+            element.scrollTop = element.scrollHeight;
+            this.showScrollButton = false;
+        },
         getModelList(apiKey) {
-            keyApi.getModelPageList(1, 100,apiKey).then(res => {
+            keyApi.getModelPageList(1, 100, apiKey).then(res => {
                 this.modelList = res.data.records
 
             })
@@ -140,11 +156,11 @@ export default {
             }
             const ctrl = new AbortController();
             const _this = this;
-            fetchEventSource('http://localhost/v1/chat/completions', {
+            fetchEventSource(axiosInstance.getUri() + '/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer '+_this.apiKey // 请确保在实际使用时填入正确的授权信息
+                    'Authorization': 'Bearer ' + _this.apiKey // 请确保在实际使用时填入正确的授权信息
                 },
                 body: JSON.stringify({
                     "model": _this.modelName,
@@ -153,6 +169,7 @@ export default {
                     "max_tokens": _this.maxTokens.value,
                     "stream": true
                 }),
+                openWhenHidden: true,
                 signal: ctrl.signal,
                 onopen: (res) => {
 
@@ -177,6 +194,9 @@ export default {
                     ctrl.abort();
                 }
             });
+            this.$nextTick(() => {
+                this.scrollToBottom();
+            });
         },
         switchSendRole() {
             if (this.sendRole === 'user') {
@@ -186,21 +206,53 @@ export default {
             }
         },
         updateSystemMsg(event) {
-            // Update the system message when it's edited
-            this.systemMsg = event.target.innerText;
+            this.updateContent(event, 'systemMsg');
         },
+        updateMessageContent(event, item) {
+            this.updateContent(event, 'content', item);
+        },
+        updateContent(event, prop, item = null) {
+            const selection = window.getSelection();
+            const range = selection.getRangeAt(0);
+            const start = range.startOffset;
+            const end = range.endOffset;
 
-        updateMessageContent(item) {
-            // This method will be called when a message's content is edited
-            // We need to find the index of the item in the messages array
-            const index = this.messages.findIndex(message => message === item);
-            if (index !== -1) {
-                // Update the content of the message
-                this.$set(this.messages, index, {
-                    ...item,
-                    content: event.target.innerText
-                });
+            const content = event.target.innerHTML;
+            if (item) {
+                item[prop] = content;
+            } else {
+                this[prop] = content;
             }
+
+            this.$nextTick(() => {
+                if (content.trim() !== '') {
+                    try {
+                        const newRange = document.createRange();
+                        const childNode = event.target.firstChild || event.target;
+                        const nodeType = childNode.nodeType;
+
+                        if (nodeType === Node.TEXT_NODE) {
+                            newRange.setStart(childNode, Math.min(start, childNode.length));
+                            newRange.setEnd(childNode, Math.min(end, childNode.length));
+                        } else {
+                            newRange.setStart(event.target, 0);
+                            newRange.setEnd(event.target, 0);
+                        }
+
+                        selection.removeAllRanges();
+                        selection.addRange(newRange);
+                    } catch (error) {
+                        console.error('Error setting cursor position:', error);
+                    }
+                } else {
+                    // If content is empty, just focus on the element
+                    event.target.focus();
+                }
+            });
+        },
+        onBlur(event) {
+            // 移除可能导致问题的空白段落
+            event.target.innerHTML = event.target.innerHTML.replace(/<p><br><\/p>/g, '<br>');
         },
     },
     created() {
@@ -210,6 +262,16 @@ export default {
     },
     mounted() {
         this.getModelList(this.apiKey);
+        this.$nextTick(() => {
+            this.scrollToBottom();
+        });
+    },
+    updated() {
+        if (!this.showScrollButton) {
+            this.$nextTick(() => {
+                this.scrollToBottom();
+            });
+        }
     }
 }
 </script>
@@ -227,7 +289,9 @@ export default {
     outline: none;
     white-space: pre-wrap;
     transition: all 0.3s ease;
+    min-height: 1em; /* 确保空内容时也有高度 */
 }
+
 
 .content-input:focus {
     border-radius: 10px;
@@ -245,14 +309,13 @@ export default {
     transform: translateY(10px);
     animation: fadeInUp 0.3s forwards;
 }
-
 .chat-container {
     display: flex;
     flex-direction: column;
     background-color: #1f1f1f;
     height: 100vh;
+    overflow: hidden; /* Prevent scrolling on the main container */
 }
-
 .header {
     padding: 1rem;
     color: white;
@@ -262,13 +325,14 @@ export default {
 .content-area {
     display: flex;
     flex: 1;
+    overflow: hidden; /* Prevent scrolling on content area */
 }
 
 .chat-area {
     flex: 0 0 85%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    overflow: hidden; /* Prevent scrolling on chat area */
 }
 
 .setting-area {
@@ -326,9 +390,40 @@ export default {
 }
 
 .message-area {
+    flex: 1;
     overflow-y: auto;
+    padding: 1rem;
+    scroll-behavior: smooth;
+    position: relative; /* 为绝对定位的子元素提供参考 */
+}
+.scroll-to-bottom {
+    position: sticky;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(45, 45, 45, 0.9);
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 10px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.3s ease, background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.7;
+    z-index: 10;
+}
+.scroll-to-bottom:hover {
+    opacity: 1;
+    background-color: rgba(60, 60, 60, 0.9);
 }
 
+/*!* 确保按钮不会与消息重叠 *!*/
+/*.message:last-child {*/
+/*    margin-bottom: 60px;*/
+/*}*/
 .send-role {
     color: #ffffff;
     font-weight: bolder;
