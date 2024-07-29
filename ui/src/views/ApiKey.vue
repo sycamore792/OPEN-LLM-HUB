@@ -129,7 +129,24 @@ import keyApi from "@/api/KeyApi";
 import DateUtil from "@/utils/DateUtil";
 import { ElMessage } from 'element-plus';
 import router from "@/router";
-
+function copyToClip(text) {
+    return new Promise((resolve, reject) => {
+        try {
+            const input = document.createElement('textarea');
+            input.setAttribute('readonly', 'readonly');
+            input.value = text;
+            document.body.appendChild(input);
+            input.select();
+            if (document.execCommand('copy')) {
+                document.execCommand('copy');
+            }
+            document.body.removeChild(input);
+            resolve(text);
+        } catch (error) {
+            reject(error);
+        }
+    })
+}
 export default {
     name: "ApiKey",
     computed: {
@@ -189,7 +206,7 @@ export default {
             return apiKey.substring(0, 4) + '*'.repeat(apiKey.length - 8) + apiKey.substring(apiKey.length - 4);
         },
         copyApiKey(apiKey) {
-            navigator.clipboard.writeText(apiKey).then(() => {
+            copyToClip(apiKey).then(() => {
                 ElMessage({
                     message: 'ApiKey 已复制到剪贴板',
                     type: 'success',
@@ -200,7 +217,8 @@ export default {
                     type: 'error',
                 });
             });
-        }
+        },
+
     }
 }
 </script>

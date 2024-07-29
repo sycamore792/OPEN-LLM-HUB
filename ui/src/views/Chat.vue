@@ -25,7 +25,22 @@
                         {{ item.modelName }}
                     </el-option>
                 </el-select>
+
+                <el-button
+                        style="margin-left: 10px;"
+                        size="small"
+                        @click="showLogDialog = true"
+                >
+                    显示日志
+                </el-button>
             </div>
+            <el-button
+                class="back-button"
+                type="text"
+                @click="goBack"
+            >
+                返回
+            </el-button>
         </div>
         <div class="content-area">
             <div class="chat-area">
@@ -33,33 +48,46 @@
                     <div class="message">
                         <span class="role">system</span>
                         <div
-                            class="content-input"
-                            contenteditable="true"
-                            @input="updateSystemMsg($event)"
-                            @blur="onBlur($event)"
-                            v-html="systemMsg"
+                                class="content-input"
+                                contenteditable="true"
+                                @input="updateSystemMsg($event)"
+                                @blur="onBlur($event)"
+                                v-html="systemMsg"
                         ></div>
                     </div>
                     <div v-for="(item, index) in messages" :key="index" class="message">
                         <span class="role">{{ item.role }}</span>
                         <div
-                            class="content-input"
-                            contenteditable="true"
-                            @input="updateMessageContent($event, item)"
-                            @blur="onBlur($event)"
-                            v-html="item.content"
+                                class="content-input"
+                                contenteditable="true"
+                                @input="updateMessageContent($event, item)"
+                                @blur="onBlur($event)"
+                                v-html="item.content"
                         ></div>
-                        <img class="delete-icon" alt="" src="@/assets/delete_icon.png" @click="messages.splice(index, 1)">
+                        <img class="delete-icon" alt="" src="@/assets/delete_icon.png"
+                             @click="messages.splice(index, 1)">
                     </div>
                     <button v-show="showScrollButton" @click="scrollToBottom" class="scroll-to-bottom">
-                        ↓ 滚动到底部
+                        👇🏼 滚动到底部
                     </button>
                 </div>
                 <div class="input-area" v-loading="inputLoading" element-loading-background="rgba(0,0,0,0.5)">
                     <div class="send-role" @click="switchSendRole">{{ this.sendRole }}</div>
-                    <input type="text" v-model="userMessage" class="send-input">
-                    <button v-show="modelName!==''" class="send-button" @click="sendMessage"><img
-                        src="@/assets/Arrow_Top.png"></button>
+                    <textarea
+                            v-model="userMessage"
+                            class="send-input"
+                            @keydown="handleKeyDown"
+                            :placeholder="modelName ? '输入消息，按回车发送，Shift+回车换行' : '请先选择模型'"
+                            :disabled="!modelName"
+                    ></textarea>
+                    <button
+                            class="send-button"
+                            @click="sendMessage"
+                            :disabled="!modelName || !userMessage.trim()"
+                            :title="!modelName ? '请先选择模型' : (!userMessage.trim() ? '请输入消息' : '发送')"
+                    >
+                        <img src="@/assets/Arrow_Top.png">
+                    </button>
                 </div>
             </div>
             <div class="setting-area">
@@ -79,13 +107,26 @@
                 </div>
             </div>
         </div>
+
+        <el-dialog
+                title="完成日志"
+                v-model="showLogDialog"
+                width="70%"
+        >
+            <el-table :data="completionsLogs" style="width: 100%">
+                <el-table-column prop="timestamp" label="时间戳" width="180"></el-table-column>
+                <el-table-column prop="model" label="模型" width="120"></el-table-column>
+                <el-table-column prop="prompt" label="提示" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="response" label="响应" show-overflow-tooltip></el-table-column>
+                <el-table-column prop="usage.total_tokens" label="tokens消耗" show-overflow-tooltip></el-table-column>
+            </el-table>
+        </el-dialog>
     </div>
 </template>
 
 <script>
 import {fetchEventSource} from "@microsoft/fetch-event-source";
 import keyApi from "@/api/KeyApi";
-import baseApi from "@/api/BaseApi";
 import axiosInstance from "@/api/BaseApi";
 
 export default {
@@ -113,9 +154,22 @@ export default {
             },
             messages: [],
             showScrollButton: false,
+            completionsLogs: [],
+            showLogDialog: false,
         }
     },
     methods: {
+        goBack() {
+            this.$router.go(-1);
+        },
+        handleKeyDown(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                if (this.modelName && this.userMessage.trim()) {
+                    this.sendMessage();
+                }
+            }
+        },
         onScroll() {
             const element = this.$refs.messageArea;
             const atBottom = element.scrollHeight - element.scrollTop <= element.clientHeight + 100; // 添加一些容差
@@ -141,26 +195,39 @@ export default {
             }
         },
         sendMessage() {
+            if (!this.modelName || this.userMessage.trim() === '') return;
+
+            const query = this.userMessage;
             this.inputLoading = true;
             let msgList = [];
             if (this.systemMsg.trim() !== "") {
                 msgList.push({role: "system", content: this.systemMsg});
             }
-            if (this.userMessage.trim() !== "") {
-                this.messages.push({role: "user", content: this.userMessage});
-                this.userMessage = "";
-                this.messages.forEach(item => {
-                    msgList.push({role: item.role, content: item.content});
-                });
-                this.messages.push({role: "assistant", content: ""});
-            }
+
+            // Add user message
+            this.messages.push({role: this.sendRole, content: this.userMessage});
+
+            // Build message list
+            this.messages.forEach(item => {
+                msgList.push({role: item.role, content: item.content});
+            });
+
+
+            // Add a new empty assistant message
+            this.messages.push({role: "assistant", content: ""});
+
             const ctrl = new AbortController();
             const _this = this;
+            const completionsLog = {
+                prompt: msgList[msgList.length-1].content,
+            }
+
+
             fetchEventSource(axiosInstance.getUri() + '/v1/chat/completions', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + _this.apiKey // 请确保在实际使用时填入正确的授权信息
+                    'Authorization': 'Bearer ' + _this.apiKey
                 },
                 body: JSON.stringify({
                     "model": _this.modelName,
@@ -172,21 +239,36 @@ export default {
                 openWhenHidden: true,
                 signal: ctrl.signal,
                 onopen: (res) => {
-
+                    // Logic for when connection opens
                 },
                 onmessage: (msg) => {
                     try {
                         let data = JSON.parse(msg.data);
+                        if (data.usage) {
+                            completionsLog['usage'] = data['usage'];
+                        }
                         const word = data['choices'][0]['delta']['content'];
                         if (word) {
+                            // Update the content of the last message (the new assistant message)
                             this.messages[this.messages.length - 1].content += word;
                         }
                     } catch (e) {
-
+                        // console.error('Error parsing message:', e);
                     }
                 },
                 onclose: () => {
                     _this.inputLoading = false;
+                    // Add log entry
+                    completionsLog.timestamp = new Date().toLocaleString();
+                    completionsLog.model = _this.modelName;
+                    completionsLog.response = _this.messages[_this.messages.length - 1].content;
+
+                    _this.completionsLogs.push(
+                        {
+                            ...completionsLog,
+                            id: _this.completionsLogs.length + 1
+                        }
+                    );
                 },
                 onerror: (err) => {
                     _this.inputLoading = false;
@@ -194,6 +276,8 @@ export default {
                     ctrl.abort();
                 }
             });
+
+            this.userMessage = ""; // Clear input box
             this.$nextTick(() => {
                 this.scrollToBottom();
             });
@@ -309,6 +393,7 @@ export default {
     transform: translateY(10px);
     animation: fadeInUp 0.3s forwards;
 }
+
 .chat-container {
     display: flex;
     flex-direction: column;
@@ -316,12 +401,19 @@ export default {
     height: 100vh;
     overflow: hidden; /* Prevent scrolling on the main container */
 }
+
 .header {
     padding: 1rem;
     color: white;
     border-bottom: 1px solid #444;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
-
+.back-button {
+    color: white;
+    font-size: 14px;
+}
 .content-area {
     display: flex;
     flex: 1;
@@ -396,6 +488,7 @@ export default {
     scroll-behavior: smooth;
     position: relative; /* 为绝对定位的子元素提供参考 */
 }
+
 .scroll-to-bottom {
     position: sticky;
     bottom: 20px;
@@ -415,15 +508,13 @@ export default {
     opacity: 0.7;
     z-index: 10;
 }
+
 .scroll-to-bottom:hover {
     opacity: 1;
     background-color: rgba(60, 60, 60, 0.9);
 }
 
-/*!* 确保按钮不会与消息重叠 *!*/
-/*.message:last-child {*/
-/*    margin-bottom: 60px;*/
-/*}*/
+
 .send-role {
     color: #ffffff;
     font-weight: bolder;
@@ -480,6 +571,10 @@ export default {
     padding: 1rem;
     border-radius: 10px;
     outline: none;
+    resize: none;
+
+    max-height: 150px;
+    overflow-y: auto;
 }
 
 .send-button {
@@ -490,11 +585,20 @@ export default {
     margin-left: 0.5rem;
     border-radius: 5px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, opacity 0.3s;
+}
+
+.send-button:hover:not(:disabled) {
+    background: #adacac;
 }
 
 .send-button:hover {
     background: #adacac;
+}
+
+.send-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .delete-icon {

@@ -4,7 +4,7 @@ import router from '@/router'; // 假设你使用了Vue Router
 
 // 创建Axios实例
 const axiosInstance = axios.create({
-    baseURL: process.env.VUE_APP_API_BASE_URL, // 从环境变量中获取基础URL
+    baseURL: baseApi, // 从环境变量中获取基础URL
     timeout: 10000, // 请求超时时间
     headers: {
         'Content-Type': 'application/json',
